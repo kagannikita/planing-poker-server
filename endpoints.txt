@@ -1,0 +1,24 @@
+Endpoints:
+Lobby:
+Get localhost:8080/lobby/
+Достать все лобби
+Get localhost:8080/lobby/{lobby_id}
+Достать нужное лобби
+Post localhost:8080/lobby/
+Cоздать лобби
+{
+"name": "имя"
+}
+Put localhost:8080/lobby/{lobby_id}
+Добавить участника в лобби
+{
+"player_id": "60337ecd-ba67-4fc3-b500-8a93a83fe952"
+}
+Player:
+Post localhost:8080/player/
+Formdata
+firstName="Nikita"
+lastName="Kagan"
+position="Backend Dev"
+role="diler"
+image=File

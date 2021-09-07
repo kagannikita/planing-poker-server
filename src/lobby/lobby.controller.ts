@@ -14,7 +14,7 @@ export class LobbyController {
   }
 
   @Get(':id')
-  getPlayer(@Param('id') id:string){
+  getLobby(@Param('id') id:string){
     return this.lobbyService.getById(id)
   }
   @Post()
@@ -25,23 +25,10 @@ export class LobbyController {
   }
   @Put(':lobby_id')
   @UsePipes(new ValidationPipe())
-  editPlayer(@Param('lobby_id') lobby_id:string,@Body() player_id:MemberDTO){
+  addMember(@Param('lobby_id') lobby_id:string,@Body() player_id:MemberDTO){
     this.logger.log(JSON.stringify(lobby_id))
     this.logger.log(JSON.stringify(player_id))
     return this.lobbyService.addMembers(lobby_id,player_id.player_id)
   }
-  //
-  //
-  // @Put(':id')
-  // @UsePipes(new ValidationPipe())
-  // editPlayer(@Param('id') id:string,@Body() data:Partial<PlayerDTO>){
-  //   this.logger.log(JSON.stringify(data))
-  //   return this.playerService.update(id,data)
-  // }
-  //
-  // @Delete(':id')
-  // deletePlayer(@Param('id') id:string){
-  //   return this.playerService.destroy(id)
-  // }
 
 }
