@@ -34,7 +34,7 @@ export class LobbyService {
     return lobby
   }
   async getById(id:string){
-    const lobby=await this.lobbyRepository.findOne({where:{id:id}})
+    const lobby = await this.lobbyRepository.findOne({ where: { id: id }, relations: ['players'] })
     if(!lobby){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }
