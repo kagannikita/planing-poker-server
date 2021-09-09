@@ -4,8 +4,10 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { setupAdminPanel } from './admin-panel/admin-panel.plugin';
 const port=process.env.PORT || 4000;
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   await setupAdminPanel(app);
   app.enableCors();
   await app.listen(port);
