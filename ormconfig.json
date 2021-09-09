@@ -7,9 +7,12 @@
   "database": "db9vup2eiaae33",
   "synchronize": true,
   "logging": true,
+  "dropSchema": false,
   "ssl": true,
-  "dialectOptions": {
-    "ssl": { "require": true }
+  "extra": {
+    "ssl": {
+      "rejectUnauthorized": false
+    }
   },
   "entities": [
     "src/**/*.entity.ts", "dist/**/*.entity.js"
