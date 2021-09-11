@@ -5,7 +5,7 @@ export class PlayerDTO{
   firstName:string
   lastName?:string
   position?:string
+  image?:string
   @IsNotEmpty()
   role:string
-  image:string
 }

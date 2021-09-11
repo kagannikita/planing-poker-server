@@ -16,7 +16,7 @@ Put localhost:8080/lobby/{lobby_id}
 }
 Player:
 Post localhost:8080/player/
-Formdata
+FormData
 firstName="Nikita"
 lastName="Kagan"
 position="Backend Dev"

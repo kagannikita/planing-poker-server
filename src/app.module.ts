@@ -7,11 +7,12 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { LobbyModule } from './lobby/lobby.module';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [TypeOrmModule.forRoot(), PlayerModule,LobbyModule],
   controllers: [AppController],
-  providers: [AppService,{
+  providers: [AppService,AppGateway,{
     provide: APP_FILTER,
     useClass:HttpErrorFilter
   },

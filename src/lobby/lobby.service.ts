@@ -14,7 +14,7 @@ export class LobbyService {
   }
 
   async showAll(){
-    return await this.lobbyRepository.find()
+    return await this.lobbyRepository.find({relations: ['players']})
   }
 
   async createEmptyLobby(data:LobbyDTO){
@@ -24,8 +24,8 @@ export class LobbyService {
   async addMembers(lobbyId:string,playerId:string) {
     const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
-    Logger.log(`Lobby: ${lobby}`)
-    Logger.log(`Player: ${player}`)
+    Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
+    Logger.log(`Player: ${JSON.stringify(player)}`)
     if (!player || !lobby){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }
