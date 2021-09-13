@@ -4,6 +4,7 @@ import AdminBro from 'admin-bro';
 import * as AdminBroExpress from 'admin-bro-expressjs';
 import { Player } from '../player/player.entity';
 import { Lobby } from '../lobby/lobby.entity';
+import { Issue } from '../issue/issue.entity';
 
 export async function setupAdminPanel(app: INestApplication): Promise<void> {
 
@@ -13,7 +14,7 @@ export async function setupAdminPanel(app: INestApplication): Promise<void> {
   AdminBro.registerAdapter({ Database, Resource });
 
   const adminBro = new AdminBro({
-    resources: [Player,Lobby],
+    resources: [Player,Lobby,Issue],
     rootPath: '/admin',
   });
 

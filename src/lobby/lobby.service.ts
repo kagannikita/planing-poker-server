@@ -33,6 +33,19 @@ export class LobbyService {
     await lobby.save()
     return lobby
   }
+  async deleteMembers(lobbyId:string,playerId:string) {
+    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players'] }) as Lobby
+    const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
+    Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
+    Logger.log(`Player: ${JSON.stringify(player)}`)
+    if (!player || !lobby){
+      throw new HttpException('Not found',HttpStatus.NOT_FOUND)
+    }
+    const index=lobby.players.findIndex(key=>key.id===playerId)
+    lobby.players.splice(index,1)
+    await lobby.save()
+    return lobby
+  }
   async getById(id:string){
     const lobby=await this.lobbyRepository.findOne({where:{id:id},relations: ['players'] })
     if(!lobby){
