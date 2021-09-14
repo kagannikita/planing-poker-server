@@ -9,8 +9,13 @@ Cоздать лобби
 {
 "name": "имя"
 }
-Put localhost:8080/lobby/{lobby_id}
+Put localhost:8080/lobby/add/{lobby_id}
 Добавить участника в лобби
+{
+"player_id": "60337ecd-ba67-4fc3-b500-8a93a83fe952"
+}
+Put localhost:8080/lobby/delete/{lobby_id}
+Удалить участника в лобби
 {
 "player_id": "60337ecd-ba67-4fc3-b500-8a93a83fe952"
 }
@@ -22,3 +27,20 @@ lastName="Kagan"
 position="Backend Dev"
 role="diler"
 image=File
+Issue:
+Post http://127.0.0.1:8080/issue/
+{
+    "name": "Issue 542",
+    "priority": "Low",
+    "lobbyId": "a1937e22-8ca5-4bec-86e2-4c2d625e0c9f"
+}
+Get by lobby http://127.0.0.1:8080/issue/a1937e22-8ca5-4bec-86e2-4c2d625e0c9f
+использовать id lobby
+Update http://127.0.0.1:8080/issue/5bed58bb-7843-492b-bfc2-0a2a1e973cdc
+использовать id issue
+{
+"name": "Issue 542",
+"priority": "Low"
+}
+Delete http://127.0.0.1:8080/issue/5bed58bb-7843-492b-bfc2-0a2a1e973cdc
+использовать id issue

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Player } from './player.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,8 +17,11 @@ export class PlayerService {
   }
 
   async create(data:PlayerDTO,image:Express.Multer.File){
-    const link=await this.uploadImage(image)
-    data.image=link.url
+    Logger.log(`File: ${image}`)
+    if (image!==undefined){
+      const link=await this.uploadImage(image)
+      data.image=link.url
+    }
     const player=this.playerRepository.create(data)
     await this.playerRepository.save(player)
     return player
@@ -56,7 +59,7 @@ export class PlayerService {
         if (error) return reject(error);
         resolve(result);
       });
-      toStream(file.buffer).pipe(upload);
+        toStream(file.buffer).pipe(upload);
     });
   }
 }
