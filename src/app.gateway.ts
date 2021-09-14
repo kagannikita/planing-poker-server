@@ -23,11 +23,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   private clients=new Map();
 
   afterInit(server: any): any {
-   this.logger.log('Socket on server init')
+    this.logger.log('Socket on server init')
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-   this.logger.log(`Client connected ${client.id}`)
+    this.logger.log(`Client connected ${client.id}`)
     // this.clients.set(client.id,client)
   }
 
@@ -35,18 +35,20 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.logger.log(`Client disconnected ${client.id}`)
     // this.clients.delete(client.id)
   }
+
   @SubscribeMessage('join')
   joinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; lobby_id: string },
+    @MessageBody() body: { player_id: string; },
   ): void {
-    const { player_id, lobby_id } = body;
-    this.users[client.id] = { player_id, lobby_id };
-    client.join(lobby_id);
-    this.clients.set(player_id,client)
+    const { name, room_id } = this.users[client.id] || {};
+    client.join(room_id);
+    this.clients.set(name,client)
     this.logger.log(`Clients: ${this.clients}`)
-    this.logger.log(`Player ${player_id} joined in lobby ${lobby_id}`)
+    client.broadcast.to(room_id).emit('joined', { ...body, name});
+    this.logger.log(`Joined: ${JSON.stringify(body)}`)
   }
+
   @SubscribeMessage('leave')
   leaveRoom(
     @ConnectedSocket() client: Socket,
@@ -65,9 +67,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { message: string },
   ): void {
-    const { name, room_id } = this.users[client.id];
+    const { name, room_id } = this.users[client.id] || {};
     client.broadcast.to(room_id).emit('receive-message', { ...body, name });
-   this.logger.log(body)
+    this.logger.log(body+" "+name)
   }
 
 }
