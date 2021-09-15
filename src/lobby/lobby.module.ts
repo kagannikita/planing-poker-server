@@ -11,6 +11,6 @@ import { Issue } from '../issue/issue.entity';
   imports:[TypeOrmModule.forFeature([Lobby,Player,Issue])],
   controllers: [LobbyController],
   providers:[LobbyService,CloudinaryProvider],
-  exports:[CloudinaryProvider]
+  exports:[CloudinaryProvider,LobbyService]
 })
 export class LobbyModule {}
