@@ -10,6 +10,7 @@ import { LobbyModule } from './lobby/lobby.module';
 import { AppGateway } from './app.gateway';
 import { IssueModule } from './issue/issue.module';
 
+
 @Module({
   imports: [TypeOrmModule.forRoot(), PlayerModule,LobbyModule,IssueModule],
   controllers: [AppController],

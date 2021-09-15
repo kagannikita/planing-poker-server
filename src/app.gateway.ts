@@ -10,6 +10,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { LobbyService } from './lobby/lobby.service';
+
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -21,32 +23,32 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   private users = {};
 
   private clients=new Map();
-
+  constructor(private lobbyService:LobbyService) {}
   afterInit(server: any): any {
     this.logger.log('Socket on server init')
   }
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected ${client.id}`)
-    // this.clients.set(client.id,client)
   }
 
   handleDisconnect(client:Socket,...args:any[]){
     this.logger.log(`Client disconnected ${client.id}`)
-    // this.clients.delete(client.id)
   }
 
   @SubscribeMessage('join')
-  joinRoom(
+  async joinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; },
-  ): void {
-    const { name, room_id } = this.users[client.id] || {};
-    client.join(room_id);
-    this.clients.set(name,client)
-    this.logger.log(`Clients: ${this.clients}`)
-    client.broadcast.to(room_id).emit('joined', { ...body, name});
+    @MessageBody() body: { name, lobby_id: string; },
+  ): Promise<void> {
+    const { name, lobby_id } = body
+    client.join(lobby_id);
+    this.clients.set(name, client)
+    console.log(this.clients.get(name).id)
+    console.log(lobby_id)
     this.logger.log(`Joined: ${JSON.stringify(body)}`)
+    const data = await this.lobbyService.getById(lobby_id)
+    client.broadcast.to(lobby_id).emit('joined', { ...data, name });
   }
 
   @SubscribeMessage('leave')
