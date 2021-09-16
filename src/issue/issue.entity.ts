@@ -16,6 +16,6 @@ export class Issue extends BaseEntity{
   @UpdateDateColumn() updated:Date;
   @Column('text',{ nullable: false }) name: string
   @Column('text',{ nullable: false }) priority:string
-  @ManyToOne(type => Lobby, lobby => lobby.id)
+  @ManyToOne(type => Lobby, lobby => lobby.issues)
   lobby: Lobby;
 }

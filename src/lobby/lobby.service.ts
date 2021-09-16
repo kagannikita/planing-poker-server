@@ -14,7 +14,7 @@ export class LobbyService {
   }
 
   async showAll(){
-    return await this.lobbyRepository.find({relations: ['players']})
+    return await this.lobbyRepository.find({relations: ['players','issues']})
   }
 
   async createEmptyLobby(data:LobbyDTO){
@@ -22,7 +22,7 @@ export class LobbyService {
   }
 
   async addMembers(lobbyId:string,playerId:string) {
-    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players'] }) as Lobby
+    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
     Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
     Logger.log(`Player: ${JSON.stringify(player)}`)
@@ -34,7 +34,7 @@ export class LobbyService {
     return lobby
   }
   async deleteMembers(lobbyId:string,playerId:string) {
-    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players'] }) as Lobby
+    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
     Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
     Logger.log(`Player: ${JSON.stringify(player)}`)
@@ -47,7 +47,7 @@ export class LobbyService {
     return lobby
   }
   async getById(id:string){
-    const lobby = await this.lobbyRepository.findOne({ where: { id: id }, relations: ['players'] })
+    const lobby=await this.lobbyRepository.findOne({where:{id:id},relations: ['players','issues'] })
     if(!lobby){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }

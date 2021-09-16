@@ -32,7 +32,7 @@ Post http://127.0.0.1:8080/issue/
 {
     "name": "Issue 542",
     "priority": "Low",
-    "lobbyId": "a1937e22-8ca5-4bec-86e2-4c2d625e0c9f"
+    "lobby": "a1937e22-8ca5-4bec-86e2-4c2d625e0c9f"
 }
 Get by lobby http://127.0.0.1:8080/issue/a1937e22-8ca5-4bec-86e2-4c2d625e0c9f
 использовать id lobby

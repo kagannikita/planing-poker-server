@@ -16,8 +16,7 @@ export class Lobby extends BaseEntity {
   @PrimaryGeneratedColumn('uuid') id: string
   @CreateDateColumn() created:Date;
   @Column('text') name:string
-  @OneToMany(type => Issue, issue => issue.id)
-  @JoinColumn({name: "account_id"})
+  @OneToMany(type => Issue, issue => issue.lobby)
   issues: Issue[];
   @ManyToMany(type => Player, { cascade: true,nullable:true })
   @JoinTable({
