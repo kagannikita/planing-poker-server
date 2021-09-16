@@ -20,7 +20,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   private logger: Logger = new Logger('AppGateway');
 
-  private users = {};
+  private users:object = {};
 
   private clients=new Map();
 
@@ -53,7 +53,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const data = await this.lobbyService.getById(lobby_id)
 
     this.server.to(lobby_id).emit('lobby:get', { data, name });
-    // client.broadcast.to(lobby_id).emit('joined', { data, name });
   }
 
   @SubscribeMessage('leave')
@@ -79,9 +78,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const currClient = this.clients.get(player_id);
     this.logger.log(`${currClient}`)
     this.users[currClient.id] = { player_id, lobby_id };
-    // client.emit('player:deleted')
-    currClient.leave(lobby_id);
-
+    this.server.to(currClient.id).emit('player:deleted')
     const data = await this.lobbyService.deleteMembers(lobby_id, player_id)
     
     this.server.to(lobby_id).emit('lobby:get', { data });
@@ -103,7 +100,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { lobby_id: string, voteToKickPlayerId: string },
   ): Promise<void> {
-    const votes = Number(((100 / this.clients.size) * this.votedQuanity).toFixed(2));
+    const votes = ((100 / this.clients.size) * this.votedQuanity)
     if (votes > 50) {
       const lobby = await this.lobbyService.deleteMembers(body.lobby_id, body.voteToKickPlayerId)
       this.server.to(body.lobby_id).emit('leave', lobby);
