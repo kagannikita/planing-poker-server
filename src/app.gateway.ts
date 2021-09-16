@@ -10,6 +10,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { IssueService } from './issue/issue.service';
 import { LobbyService } from './lobby/lobby.service';
 
 
@@ -26,7 +27,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   private votedQuanity = 0;
   
-  constructor(private lobbyService:LobbyService) {}
+  constructor(
+    private lobbyService:LobbyService,
+    private issueService: IssueService) {}
   afterInit(server: any): any {
     this.logger.log('Socket on server init')
   }
@@ -113,4 +116,44 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
   }
 
+  @SubscribeMessage('issue:delete')
+  async deleteIssue(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: {id: string, lobby_id: string}
+  ): Promise<void> {
+    await this.issueService.destroy(body.id);
+    const data = await this.lobbyService.getById(body.lobby_id);
+    
+    this.server.to(body.lobby_id).emit('lobby:get', { data });
+    this.logger.log(`Issue with ${body.id} deleted from the lobby ${body.lobby_id}`)
+  }
+
+  @SubscribeMessage('issue:add')
+  async createIssue(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { name:string, priority: string, lobby_id: string }
+  ): Promise<void> {
+    console.log(body);
+    
+    await this.issueService.create({name: body.name, priority: body.priority})
+    const data = await this.lobbyService.getById(body.lobby_id);
+
+    this.server.to(body.lobby_id).emit('lobby:get', { data });
+    this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
+  }
+
+  @SubscribeMessage('issue:update')
+  async updateIssue(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { name: string, priority: string, lobby_id: string }
+  ): Promise<void> {
+    await this.issueService.update(body.lobby_id, { 
+      name: body.name, 
+      priority: body.priority 
+    })
+    const data = await this.lobbyService.getById(body.lobby_id);
+
+    this.server.to(body.lobby_id).emit('lobby:get', { data });
+    this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
+  }
 }
