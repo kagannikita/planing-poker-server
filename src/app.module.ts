@@ -9,13 +9,17 @@ import { LoggingInterceptor } from './shared/logging.interceptor';
 import { LobbyModule } from './lobby/lobby.module';
 import { AppGateway } from './app.gateway';
 import { IssueModule } from './issue/issue.module';
+import { IssueService } from './issue/issue.service';
+import { Issue } from './issue/issue.entity';
+import { Lobby } from './lobby/lobby.entity';
 import { SettingsModule } from './settings/settings.module';
 
 
+
 @Module({
-  imports: [TypeOrmModule.forRoot(), PlayerModule,LobbyModule,IssueModule,SettingsModule],
+  imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, SettingsModule, TypeOrmModule.forFeature([Issue, Lobby])],
   controllers: [AppController],
-  providers: [AppService,AppGateway,{
+  providers: [IssueService, AppService,AppGateway,{
     provide: APP_FILTER,
     useClass:HttpErrorFilter
   },
