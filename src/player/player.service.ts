@@ -3,8 +3,7 @@ import { Repository } from 'typeorm';
 import { Player } from './player.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlayerDTO } from './player.dto';
-import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
-import toStream = require('buffer-to-stream');
+import { uploadImage } from '../shared/upload.function';
 
 @Injectable()
 export class PlayerService {
@@ -19,7 +18,7 @@ export class PlayerService {
   async create(data:PlayerDTO,image:Express.Multer.File){
     Logger.log(`File: ${image}`)
     if (image!==undefined){
-      const link=await this.uploadImage(image)
+      const link=await uploadImage(image)
       data.image=link.url
     }
     const player=this.playerRepository.create(data)
@@ -53,13 +52,5 @@ export class PlayerService {
     await this.playerRepository.delete({id})
     return player
   }
-  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse | UploadApiErrorResponse> {
-    return new Promise((resolve, reject) => {
-      const upload = v2.uploader.upload_stream((error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      });
-        toStream(file.buffer).pipe(upload);
-    });
-  }
+
 }

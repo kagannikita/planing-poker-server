@@ -6,11 +6,16 @@ import { Player } from '../player/player.entity';
 import { LobbyController } from './lobby.controller';
 import { LobbyService } from './lobby.service';
 import { Issue } from '../issue/issue.entity';
+import { LobbyGateway } from './lobby.gateway';
+import { Cards, Settings } from '../settings/settings.entity';
+import { PlayerService } from '../player/player.service';
+import { IssueService } from '../issue/issue.service';
+import { SettingsService } from '../settings/settings.service';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Lobby,Player,Issue])],
+  imports:[TypeOrmModule.forFeature([Lobby,Player,Issue,Settings,Cards])],
   controllers: [LobbyController],
-  providers:[LobbyService,CloudinaryProvider],
-  exports:[CloudinaryProvider,LobbyService]
+  providers:[LobbyService,PlayerService,IssueService,SettingsService,CloudinaryProvider,LobbyGateway],
+  exports:[CloudinaryProvider,LobbyService,LobbyGateway]
 })
 export class LobbyModule {}

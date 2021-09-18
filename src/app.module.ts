@@ -12,11 +12,12 @@ import { IssueModule } from './issue/issue.module';
 import { IssueService } from './issue/issue.service';
 import { Issue } from './issue/issue.entity';
 import { Lobby } from './lobby/lobby.entity';
+import { SettingsModule } from './settings/settings.module';
+
 
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, 
-    TypeOrmModule.forFeature([Issue, Lobby])],
+  imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, SettingsModule, TypeOrmModule.forFeature([Issue, Lobby])],
   controllers: [AppController],
   providers: [IssueService, AppService,AppGateway,{
     provide: APP_FILTER,
