@@ -9,6 +9,7 @@ export class LobbyGateway  {
   private server: Server;
 
   constructor(private lobbyService:LobbyService) {}
+
   @SubscribeMessage('join')
   async joinRoom(
     @ConnectedSocket() client: Socket,

@@ -9,10 +9,11 @@ import { LoggingInterceptor } from './shared/logging.interceptor';
 import { LobbyModule } from './lobby/lobby.module';
 import { AppGateway } from './app.gateway';
 import { IssueModule } from './issue/issue.module';
+import { SettingsModule } from './settings/settings.module';
 
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), PlayerModule,LobbyModule,IssueModule],
+  imports: [TypeOrmModule.forRoot(), PlayerModule,LobbyModule,IssueModule,SettingsModule],
   controllers: [AppController],
   providers: [AppService,AppGateway,{
     provide: APP_FILTER,

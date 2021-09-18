@@ -2,10 +2,9 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
-  Entity,
+  Entity, JoinColumn, JoinTable, ManyToOne, OneToMany,
   PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
-
 
 @Entity('settings')
 export class Settings extends BaseEntity {
@@ -17,13 +16,19 @@ export class Settings extends BaseEntity {
   @Column('bool',{ nullable: true }) timer_needed:boolean
   @Column('text',{ nullable: true }) score_type:string
   @Column('text',{ nullable: true }) score_type_short:string
-  @Column('timestamptz',{nullable: true }) timer: Date;
+  @Column('timestamptz',{nullable: true }) timer: string;
+  @OneToMany(type => Cards, card => card.settings)
+  cards: Cards[];
 }
-export class Cards extends BaseEntity{
+
+@Entity('cards')
+export class Cards extends BaseEntity {
   @PrimaryGeneratedColumn('uuid') id: string
   @CreateDateColumn() created:Date;
   @UpdateDateColumn() updated:Date;
-  @Column('text',{ nullable: true }) cover:string
-  @Column('text',{ nullable: true }) image:string
-  @Column('text',{ nullable: true }) text:string
+  @Column('text',{ nullable: false }) image:string
+  @Column('bool',{ nullable: false }) is_cover:boolean
+  @Column('text',{ nullable: false }) name:string
+  @ManyToOne(type => Settings, settings => settings.cards)
+  settings: Settings;
 }

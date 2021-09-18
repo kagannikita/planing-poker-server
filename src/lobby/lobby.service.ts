@@ -6,6 +6,8 @@ import { Player } from '../player/player.entity';
 import { LobbyDTO } from './lobby.dto';
 import { ConnectedSocket, MessageBody, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { SettingsService } from '../settings/settings.service';
+import { Settings } from '../settings/settings.entity';
 
 @Injectable()
 export class LobbyService {
@@ -17,22 +19,21 @@ export class LobbyService {
   constructor(@InjectRepository(Lobby)
               private lobbyRepository:Repository<Lobby>,
               @InjectRepository(Player)
-  private playerRepository: Repository<Player>) {
+  private playerRepository: Repository<Player>,
+  private settingsService:SettingsService) {
   }
 
   async showAll(){
-    const user= await this.lobbyRepository.createQueryBuilder('lobby').leftJoinAndSelect("lobby.players","player")
-      .where("player.id=:id",{id:"962a5c3d-afb2-4a68-9a03-eef953d68617"}).getOne()
-    console.log(`User: ${user.players[0].role})`)
-    return await this.lobbyRepository.find({relations: ['players','issues']})
+    return await this.lobbyRepository.find({relations: ['players','issues','settings','settings.cards']})
   }
 
   async createEmptyLobby(data:LobbyDTO){
-    return this.lobbyRepository.save(data);
+    data.settings=await this.settingsService.createSettings() as Settings
+    return await this.lobbyRepository.save(data);
   }
 
   async addMembers(lobbyId:string,playerId:string) {
-    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues'] }) as Lobby
+    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues','settings','settings.cards'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
     Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
     Logger.log(`Player: ${JSON.stringify(player)}`)
@@ -44,7 +45,7 @@ export class LobbyService {
     return lobby
   }
   async deleteMembers(lobbyId:string,playerId:string) {
-    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues'] }) as Lobby
+    const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players','issues','settings','settings.cards'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
     Logger.log(`Lobby: ${JSON.stringify(lobby)}`)
     Logger.log(`Player: ${JSON.stringify(player)}`)
@@ -57,7 +58,7 @@ export class LobbyService {
     return lobby
   }
   async getById(id:string){
-    const lobby=await this.lobbyRepository.findOne({where:{id:id},relations: ['players','issues'] })
+    const lobby=await this.lobbyRepository.findOne({where:{id:id},relations: ['players','issues','settings','settings.cards'] })
     if(!lobby){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }
@@ -71,7 +72,7 @@ export class LobbyService {
     this.logger.log("lobby id ",lobby_id)
     this.logger.log(`Joined: ${JSON.stringify(body)}`)
     const data = await this.getById(lobby_id)
-    client.broadcast.to(lobby_id).emit('joined', { ...data, name });
+    this.server.to(lobby_id).emit('joined', { ...data, name });
   }
 
   sendMessage(@ConnectedSocket() client: Socket,body:{message:string}){
