@@ -63,10 +63,13 @@ FormData
 "image":file,
 "settings": "c5b2f0da-2fb7-4864-bc54-089ff97c0114"
 }
+
+
 Settings Cards Put http://127.0.0.1:8080/settings/cards/c7f633e5-cde6-405a-bdb4-a8bf74151633
 {
 "name":"SP",
 "is_cover":true,
 "image":file,
 }
+
 Settings Cards Delete http://127.0.0.1:8080/settings/cards/c7f633e5-cde6-405a-bdb4-a8bf74151633
