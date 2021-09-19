@@ -3,11 +3,12 @@
   "host": "127.0.0.1",
   "port": "5432",
   "username": "postgres",
-  "password": "admin",
-  "database": "planning-poker",
+  "password": "123456",
+  "database": "plaining-poker",
   "synchronize": true,
   "logging": true,
   "entities": [
     "src/**/*.entity.ts", "dist/**/*.entity.js"
   ]
 }
+

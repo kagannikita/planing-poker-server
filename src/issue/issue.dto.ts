@@ -6,5 +6,7 @@ export class IssueDTO{
   name:string
   @IsNotEmpty()
   priority:string
+  @IsNotEmpty()
+  link:string
   lobby?:LobbyDTO
 }
