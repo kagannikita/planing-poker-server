@@ -22,15 +22,14 @@ export class SettingsService {
     const data=new Settings()
     data.is_dealer_play=false
     data.is_change_cards=false
-    data.score_type=''
-    data.score_type_short=''
+    data.score_type='Score Point'
+    data.score_type_short='SP'
     data.timer=null
     data.timer_needed=false
     const settings=this.settingsRepository.create(data)
     await this.settingsRepository.save(settings)
     return settings
   }
-
   async updateSettings(id:string,data:Partial<SettingsDTO>){
     let settings=await this.settingsRepository.findOne({where:{id}})
     if(!settings){
