@@ -27,7 +27,6 @@ export class Cards extends BaseEntity {
   @CreateDateColumn() created:Date;
   @UpdateDateColumn() updated:Date;
   @Column('text',{ nullable: false }) image:string
-  @Column('bool',{ nullable: false }) is_cover:boolean
   @Column('text',{ nullable: false }) name:string
   @ManyToOne(type => Settings, settings => settings.cards)
   settings: Settings;
