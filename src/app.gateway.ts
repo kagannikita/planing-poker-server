@@ -103,15 +103,19 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { lobby_id: string, voteToKickPlayerId: string },
   ): Promise<void> {
-    const votes = ((100 / this.clients.size) * this.votedQuanity)
+    let votedQuantity = this.votedQuanity
+    const { lobby_id, voteToKickPlayerId } = body
+    const votes = ((100 / this.clients.size) * votedQuantity)
+    let modalIsOpen = false
     if (votes > 50) {
       const lobby = await this.lobbyService.deleteMembers(body.lobby_id, body.voteToKickPlayerId)
       this.server.to(body.lobby_id).emit('leave', lobby);
-      this.votedQuanity = 0;
+      votedQuantity = 0;
       this.logger.log("player with id: ", body.voteToKickPlayerId, "kicked")
     } else {
-      this.votedQuanity++
-      this.server.to(body.lobby_id).emit('kick:voted', this.votedQuanity);
+      votedQuantity++
+      modalIsOpen = true
+      this.server.to(body.lobby_id).emit('kick:voted', { votedQuantity, modalIsOpen, lobby_id, voteToKickPlayerId });
       this.logger.log("Kick voted: ", this.votedQuanity)
     }
   }
@@ -149,4 +153,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(body.lobby_id).emit('lobby:get', { data });
     this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
   }
+
+
+  // this.client.broadcast.to(lobby_id).emit('kick:voted', {
+  //   modalIsOpen: true,
+  //   playerId,
+  //   playerName,
+  //   votesQuanity
+  // })
+
 }

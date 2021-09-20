@@ -18,8 +18,8 @@ export class SettingsDTO{
 }
 export class CardDTO{
   image?:string
-  @IsNotEmpty()
-  is_cover:boolean
+  // @IsNotEmpty()
+  // is_cover:boolean
   @IsNotEmpty()
   name:string
   settings?:SettingsDTO
