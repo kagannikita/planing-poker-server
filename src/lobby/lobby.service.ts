@@ -64,16 +64,16 @@ export class LobbyService {
     }
     return lobby
   }
-  async joinRoom( @ConnectedSocket() client: Socket,body:{name:string,lobby_id:string}){
-    const { name, lobby_id } = body
-    client.join(lobby_id);
-    this.clients.set(name, client)
-    this.logger.log('get client', this.clients.get(name).id)
-    this.logger.log("lobby id ",lobby_id)
-    this.logger.log(`Joined: ${JSON.stringify(body)}`)
-    const data = await this.getById(lobby_id)
-    this.server.to(lobby_id).emit('joined', { ...data, name });
-  }
+  // async joinRoom( @ConnectedSocket() client: Socket,body:{name:string,lobby_id:string}){
+  //   const { name, lobby_id } = body
+  //   client.join(lobby_id);
+  //   this.clients.set(name, client)
+  //   this.logger.log('get client', this.clients.get(name).id)
+  //   this.logger.log("lobby id ",lobby_id)
+  //   this.logger.log(`Joined: ${JSON.stringify(body)}`)
+  //   const data = await this.getById(lobby_id)
+  //   this.server.to(lobby_id).emit('joined', { ...data, name });
+  // }
 
   sendMessage(@ConnectedSocket() client: Socket,body:{message:string}){
     const { name, room_id } = this.users[client.id] || {};
