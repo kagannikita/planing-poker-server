@@ -11,6 +11,6 @@ async function bootstrap() {
   await setupAdminPanel(app);
   app.enableCors();
   await app.listen(port);
-  Logger.log(`Server running on http;//localhost:${port}`,'Bootstrap')
+  Logger.log(`Server running on http://localhost:${port}`,'Bootstrap')
 }
 bootstrap();

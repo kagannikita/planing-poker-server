@@ -26,24 +26,10 @@ export class SettingsService {
     data.score_type_short='SP'
     data.timer=null
     data.timer_needed=false
-    const card1=await this.createCoverCards('https://res.cloudinary.com/plaining-poker/image/upload/v1631879184/dibpHF_vba7zs.jpg')
-    const card2=await this.createCoverCards('https://res.cloudinary.com/plaining-poker/image/upload/v1631879177/scale_1200_zwr5jo.jpg')
-    const card3=await this.createCoverCards('https://res.cloudinary.com/plaining-poker/image/upload/v1631879169/linii-ogni-sfera_sxd6ry.jpg')
-    data.cards=[card1,card2,card3]
     const settings=this.settingsRepository.create(data)
     await this.settingsRepository.save(settings)
     return settings
   }
-  async createCoverCards(image:string){
-    const data=new Cards()
-    data.name = ''
-    // data.is_cover=true
-    data.image=image
-    const card=this.cardsRepository.create(data)
-    await this.cardsRepository.save(card)
-    return card
-  }
-
   async updateSettings(id:string,data:Partial<SettingsDTO>){
     let settings=await this.settingsRepository.findOne({where:{id}})
     if(!settings){

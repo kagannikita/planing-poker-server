@@ -10,13 +10,13 @@ export class LobbyGateway  {
 
   constructor(private lobbyService:LobbyService) {}
 
-  @SubscribeMessage('join')
-  async joinRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() body: { name:string, lobby_id: string; },
-  ): Promise<void> {
-     await this.lobbyService.joinRoom(client, body)
-  }
+  // @SubscribeMessage('join')
+  // async joinRoom(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() body: { name:string, lobby_id: string; },
+  // ): Promise<void> {
+  //    await this.lobbyService.joinRoom(client, body)
+  // }
 
   @SubscribeMessage('leave')
   async leaveRoom(

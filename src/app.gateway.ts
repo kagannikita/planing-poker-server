@@ -25,9 +25,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   private clients = new Map();
 
-  private votedPlayers = new Map();
+  private clientKick:Map<string, string[]>=new Map();
 
-  private playersToKick = new Map();
+  private votesPlayers=[]
 
   constructor(
     private lobbyService: LobbyService,
@@ -52,12 +52,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const { name, lobby_id } = body
     client.join(lobby_id);
     this.clients.set(name, client)
-    console.log('get client', this.clients.get(name).id)
     console.log("lobby id ", lobby_id)
     this.logger.log(`Joined: ${JSON.stringify(body)}`)
     const data = await this.lobbyService.getById(lobby_id)
 
     this.server.to(lobby_id).emit('lobby:get', { data, name });
+
+    const kickPlayer = JSON.stringify(Array.from(this.clientKick));
+    client.emit('vote:data', { kickPlayer })
   }
 
   @SubscribeMessage('leave')
@@ -100,45 +102,34 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.logger.log(body + " " + name)
   }
 
+
   @SubscribeMessage('vote-kick')
   async voteKickPlayer(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { lobby_id: string, kickerId: string,  voteToKickPlayerId: string, playerName: string },
+    @MessageBody() body: { lobby_id: string, voteToKickPlayerId: string, playerName: string,currentPlayer:string },
   ): Promise<void> {
-    const { lobby_id, kickerId, voteToKickPlayerId, playerName } = body
-    if (this.votedPlayers.get(kickerId)) return
-
-    let playerVotes: number
-    
-    if (this.playersToKick.has(voteToKickPlayerId)) {
-      playerVotes = this.playersToKick.get(voteToKickPlayerId)
-    } else { 
-      this.playersToKick.set(voteToKickPlayerId, 0)
-      playerVotes = this.playersToKick.get(voteToKickPlayerId)
+    const { lobby_id, voteToKickPlayerId, playerName,currentPlayer } = body
+    this.clientKick.get(voteToKickPlayerId)
+    if(!this.clientKick.get(voteToKickPlayerId)){
+      this.clientKick.set(voteToKickPlayerId,[])
     }
-    console.log('playerVotes ', playerVotes);
-    
-    const votes = ((100 / this.clients.size) * playerVotes)
-    let modalIsOpen = false
-    
+    const data=await this.lobbyService.getById(lobby_id)
+    const votes = ((100 / data.players.filter((player)=>player.role==='player').length)
+      * (this.clientKick.get(voteToKickPlayerId).length+1))
+    console.log(votes)
     if (votes > 50) {
-      const lobby = await this.lobbyService.deleteMembers(lobby_id, voteToKickPlayerId)
-      // this.server.to(body.lobby_id).emit('leave', lobby);
+      const data = await this.lobbyService.deleteMembers(lobby_id, voteToKickPlayerId)
       const currClient = this.clients.get(voteToKickPlayerId);
-      this.server.to(currClient.id).emit('player:deleted')
-      this.server.to(lobby_id).emit('player:kicked', { btnBlocked: false })
-      this.server.to(lobby_id).emit('lobby:get', lobby);
-      this.playersToKick.clear();
-      this.votedPlayers.clear();
+      
+      client.to(currClient.id).emit('player:deleted')
+      this.server.to(lobby_id).emit('lobby:get', {data});
+      this.clientKick.delete(voteToKickPlayerId)
       this.logger.log("player with id: ", voteToKickPlayerId, "kicked")
     } else {
-      this.playersToKick.set(voteToKickPlayerId, ++playerVotes)
-      this.votedPlayers.set(kickerId, true);
-      modalIsOpen = true
-      const player = this.playersToKick.get(voteToKickPlayerId);
-      client.broadcast.emit('kick:voted', { data: { votedQuanity: player, modalIsOpen, lobby_id, voteToKickPlayerId, playerName}, btnBlocked: true })
-      // this.server.to(body.lobby_id).emit('kick:voted', { votedQuantity, modalIsOpen, lobby_id, voteToKickPlayerId });
-      this.logger.log("Kick voted: ", playerVotes)
+      this.clientKick.get(voteToKickPlayerId).push(currentPlayer)
+      const kickPlayer = JSON.stringify(Array.from(this.clientKick));
+      this.server.to(lobby_id).emit('kick:voted', {kickPlayer,voteToKickPlayerId, playerName,currentPlayer })
+      this.logger.log("Kick voted: ", kickPlayer)
     }
   }
 
@@ -175,6 +166,5 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(body.lobby_id).emit('lobby:get', { data });
     this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
   }
-
 
 }
