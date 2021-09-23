@@ -17,6 +17,7 @@ export class Issue extends BaseEntity{
   @Column('text',{ nullable: false }) name: string
   @Column('text',{ nullable: false }) priority:string
   @Column('text',{ nullable: false }) link:string
+  @Column('text',{ nullable: true }) score:string
   @ManyToOne(type => Lobby, lobby => lobby.issues)
   lobby: Lobby;
 }

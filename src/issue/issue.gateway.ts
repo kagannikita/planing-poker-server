@@ -8,7 +8,7 @@ import { Logger } from '@nestjs/common';
 export class IssueGateway{
   @WebSocketServer()
   private server: Server
-  private logger: Logger = new Logger('IssyeGateway');
+  private logger: Logger = new Logger('IssueGateway');
   constructor(private issueService:IssueService,
               private lobbyService:LobbyService) {}
 
