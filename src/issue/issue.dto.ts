@@ -9,5 +9,6 @@ export class IssueDTO{
   @IsNotEmpty()
   link:string
   lobby?:LobbyDTO
+  @IsNotEmpty()
   score:string
 }

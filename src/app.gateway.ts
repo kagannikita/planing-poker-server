@@ -23,9 +23,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   private users: object = {};
 
-  private clients = new Map();
-
-  private clientKick:Map<string, string[]>=new Map();
 
   constructor(
     private lobbyService: LobbyService,
