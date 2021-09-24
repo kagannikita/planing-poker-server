@@ -9,11 +9,12 @@ import { CloudinaryProvider } from '../shared/cloudinary.provider';
 import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
 import { GameGateway } from './game.gateway';
+import { GameService } from './game.service';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Issue,Lobby,Player,Settings,Cards])],
   // controllers: [IssueController],
-  providers:[CloudinaryProvider,GameGateway,LobbyService,SettingsService,IssueService],
+  providers: [CloudinaryProvider, GameGateway,GameService,LobbyService,SettingsService,IssueService],
   exports:[CloudinaryProvider,GameGateway]
 })
 export class GameModule {}
