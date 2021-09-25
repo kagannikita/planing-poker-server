@@ -32,6 +32,23 @@ export class GameGateway{
   //   const status='start'
   //   this.server.to(issueId).emit('start', { issueId,timer,status});
   // }
+  @SubscribeMessage('redirect')
+  async redirectGame(@ConnectedSocket() client: Socket,
+        @MessageBody() body: { pathname: string,playerId:string, lobbyId: string,exit:boolean,isDealer:boolean }) {
+    const {pathname,lobbyId,exit,isDealer,playerId}=body
+    const clients=await this.lobbyService.getById(lobbyId)
+     if (exit){
+         const currClient=await this.lobbyService.currClientDelete(client,playerId)
+         this.server.to(currClient.id).emit('player:deleted')
+       this.server.to(lobbyId).emit('lobby:get', { ...body});
+     }
+     if(exit && isDealer){
+       for (const player of clients.players) {
+         const currClient = await this.lobbyService.currClientDelete(client, player.id)
+         this.server.to(currClient.id).emit('player:deleted')
+       }
+     }
+  }
 
   @SubscribeMessage('game:start')
   async gameStart(
@@ -39,12 +56,13 @@ export class GameGateway{
     @MessageBody() body: { gameData: GameData, lobbyId: string },
   ): Promise<void> {
     let countdown = body.gameData.timer;
-    this.timer[body.lobbyId] = setInterval(function () {
+    const timer=this.timer
+    timer[body.lobbyId] = setInterval(function () {
       if (countdown <= 0) {
         body.gameData.status = GameState.paused;
         body.gameData.timer = countdown
         // не работает отчистка интервала
-        clearInterval(this.timer[body.lobbyId]);
+        clearInterval(timer[body.lobbyId]);
         client.to(body.lobbyId).emit('game:paused', { gameData: body.gameData });
       } else {
         countdown--

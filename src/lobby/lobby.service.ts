@@ -89,9 +89,8 @@ export class LobbyService {
   }
   async currClientDelete(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; lobby_id: string },
+    @MessageBody() player_id: string,
   ): Promise<any> {
-    const { player_id, lobby_id } = body;
     const currClient = this.clients.get(player_id);
     this.logger.log(`${currClient}`)
     return currClient

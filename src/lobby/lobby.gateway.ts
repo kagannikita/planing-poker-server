@@ -37,7 +37,7 @@ export class LobbyGateway  {
     @MessageBody() body: { player_id: string; lobby_id: string },
   ): Promise<void> {
     const { player_id, lobby_id } = body;
-    const currClient=await this.lobbyService.currClientDelete(client,body)
+    const currClient=await this.lobbyService.currClientDelete(client,player_id)
     this.server.to(currClient.id).emit('player:deleted')
     const data = await this.lobbyService.deleteMembers(lobby_id, player_id)
     this.server.to(lobby_id).emit('lobby:get', { data });
