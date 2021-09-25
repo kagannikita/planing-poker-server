@@ -50,4 +50,16 @@ export class IssueService {
     await this.issueRepository.delete({id})
     return issue
   }
+  async createArray(data:IssueDTO[]){
+    for(const issue of data){
+      issue.score='-'
+      const lobby=await this.lobbyRepository.findOne({where:{id:issue.lobby}}) as Lobby
+      if(!lobby){
+        throw new HttpException('Not found',HttpStatus.NOT_FOUND)
+      }
+      issue.lobby=lobby
+    }
+    return await this.issueRepository.save(data)
+  }
+
 }

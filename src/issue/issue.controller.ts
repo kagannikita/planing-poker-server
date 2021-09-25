@@ -33,4 +33,12 @@ export class IssueController {
     this.logger.log(JSON.stringify(data))
     return this.issueService.create(data)
   }
+
+  @Post('table')
+  @UsePipes(new ValidationPipe())
+  createIssues(@Body() data:IssueDTO[])
+  {
+    this.logger.log('Array: '+JSON.stringify(data))
+    return this.issueService.createArray(data)
+  }
 }
