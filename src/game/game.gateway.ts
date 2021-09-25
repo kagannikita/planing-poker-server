@@ -48,6 +48,9 @@ export class GameGateway{
          this.server.to(currClient.id).emit('player:deleted')
        }
      }
+     if(!exit &&!isDealer){
+       this.server.to(lobbyId).emit('redirect:get', { pathname,lobbyId});
+     }
   }
 
   @SubscribeMessage('game:start')
