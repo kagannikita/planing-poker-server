@@ -11,12 +11,8 @@ import { Settings } from '../settings/settings.entity';
 
 @Injectable()
 export class LobbyService {
-  private clients=new Map();
-  private users:object = {};
   @WebSocketServer()
   private server: Server;
-  private clientKick:Map<string, string[]>=new Map();
-  private logger=new Logger('LobbyModule')
   constructor(@InjectRepository(Lobby)
               private lobbyRepository:Repository<Lobby>,
               @InjectRepository(Player)
@@ -67,32 +63,5 @@ export class LobbyService {
     }
     return lobby
   }
-  async joinRoom( @ConnectedSocket() client: Socket,body:{name:string,lobby_id:string}){
-    const { name, lobby_id } = body
-    client.join(lobby_id);
-    this.clients.set(name, client)
-    console.log("lobby id ", lobby_id)
-    this.logger.log(`Joined: ${JSON.stringify(body)}`)
-    const kickPlayer = JSON.stringify(Array.from(this.clientKick));
-    client.emit('vote:data', { kickPlayer })
-  }
-  async leaveRoom(
-    @ConnectedSocket() client: Socket,
-    body: { player_id: string; lobby_id: string },
-  ): Promise<void> {
-    const { player_id, lobby_id } = body;
-    const currClient = this.clients.get(player_id);
-    this.logger.log(`${currClient}`)
-    this.users[currClient.id] = { player_id, lobby_id };
-    currClient.leave(lobby_id);
-    this.logger.log(`Player ${player_id} left in lobby ${lobby_id}`)
-  }
-  async currClientDelete(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() player_id: string,
-  ): Promise<any> {
-    const currClient = this.clients.get(player_id);
-    this.logger.log(`${currClient}`)
-    return currClient
-  }
+
 }

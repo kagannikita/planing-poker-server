@@ -22,7 +22,7 @@ export class LobbyGateway  {
     const { playerId, lobby_id } = body
     client.join(lobby_id)
     this.mainGateway.users.set(playerId, client);
-    // await this.lobbyService.joinRoom(client, body)
+    console.log('New user',this.mainGateway.users.get(playerId).id)
     const data = await this.lobbyService.getById(lobby_id)
     client.emit('lobby:get', { data, playerId });
     this.mainGateway.server.to(lobby_id).emit('lobby:get', { data, playerId});
@@ -36,29 +36,7 @@ export class LobbyGateway  {
     const user = this.mainGateway.users.get(body.player_id)
     user.leave(body.lobby_id)
     this.mainGateway.users.delete(body.player_id)
-    // const data = await this.lobbyService.deleteMembers(body.lobby_id, body.player_id)
-    // this.mainGateway.server.to(body.lobby_id).emit('lobby:get', { data })
-    // await this.lobbyService.leaveRoom(client, body)
   }
-
-  // @SubscribeMessage('join')
-  // async joinRoom(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { name, lobby_id: string; },
-  // ): Promise<void> {
-  //   const { name, lobby_id } = body
-  //   await this.lobbyService.joinRoom(client, body)
-  //   const data = await this.lobbyService.getById(lobby_id)
-  //   this.mainGateway.server.to(lobby_id).emit('lobby:get', { data, name });
-  // }
-
-  // @SubscribeMessage('leave')
-  // async leaveRoom(
-  //     @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { player_id: string; lobby_id: string },
-  // ): Promise<void> {
-  //   await this.lobbyService.leaveRoom(client, body)
-  // }
 
   @SubscribeMessage('player:delete')
   async deletePlayer(
@@ -66,8 +44,7 @@ export class LobbyGateway  {
     @MessageBody() body: { player_id: string; lobby_id: string },
   ): Promise<void> {
     const { player_id, lobby_id } = body;
-    // не работает тут V
-    const currClient=await this.lobbyService.currClientDelete(client,player_id)
+    const currClient= this.mainGateway.users.get(player_id);
     this.mainGateway.server.to(currClient.id).emit('player:deleted')
     const data = await this.lobbyService.deleteMember(lobby_id, player_id)
     this.mainGateway.server.to(lobby_id).emit('lobby:get', { data });

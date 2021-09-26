@@ -8,8 +8,7 @@ import { GameService } from './game.service';
 import { GameData, GameState } from './interface';
 import { AppGateway } from 'src/app.gateway';
 
-// TO DO: СДЕЛАТЬ ЕВЕНТ СОКЕТ РЕДИРЕКТ ВСЕХ КЛИЕНТОВ ПО ОТПРАВЛЕННОМУ АДРЕСУ И ID
-// FIX: ОТЧИСТКА ИНТЕРВАЛА
+
 
 @WebSocketGateway()
 export class GameGateway{
@@ -24,28 +23,20 @@ export class GameGateway{
               private lobbyService:LobbyService,
               private mainGateway: AppGateway) {}
 
-  // @SubscribeMessage('game:data')
-  // async gameData(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { issueId:string,timer:number },
-  // ): Promise<void> {
-  //   const {issueId,timer}=body
-  //   const status='start'
-  //   this.server.to(issueId).emit('start', { issueId,timer,status});
-  // }
+
   @SubscribeMessage('redirect')
   async redirectGame(@ConnectedSocket() client: Socket,
         @MessageBody() body: { pathname: string,playerId:string, lobbyId: string,exit:boolean,isDealer:boolean }) {
     const {pathname,lobbyId,exit,isDealer,playerId}=body
     const clients=await this.lobbyService.getById(lobbyId)
      if (exit){
-         const currClient=await this.lobbyService.currClientDelete(client,playerId)
+         const currClient=this.mainGateway.users.get(playerId)
          this.mainGateway.server.to(currClient.id).emit('player:deleted')
        this.mainGateway.server.to(lobbyId).emit('lobby:get', { ...body});
      }
      if(exit && isDealer){
        for (const player of clients.players) {
-         const currClient = await this.lobbyService.currClientDelete(client, player.id)
+         const currClient = this.mainGateway.users.get(player.id)
          this.mainGateway.server.to(currClient.id).emit('player:deleted')
        }
      }
@@ -65,7 +56,7 @@ export class GameGateway{
       if (countdown <= 0) {
         body.gameData.status = GameState.paused;
         body.gameData.timer = countdown
-        // не работает отчистка интервала
+        // не работает очистка интервала
         clearInterval(timer[body.lobbyId]);
         client.to(body.lobbyId).emit('game:paused', { gameData: body.gameData });
       } else {
