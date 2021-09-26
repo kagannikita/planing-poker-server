@@ -26,6 +26,8 @@ export class LobbyGateway  {
     const data = await this.lobbyService.getById(lobby_id)
     client.emit('lobby:get', { data, playerId });
     this.mainGateway.server.to(lobby_id).emit('lobby:get', { data, playerId});
+    console.log(this.mainGateway.users.size);
+    
   }
 
   @SubscribeMessage('leave')
@@ -33,9 +35,9 @@ export class LobbyGateway  {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { player_id: string; lobby_id: string },
   ): Promise<void> {
-    const user = this.mainGateway.users.get(body.player_id)
-    user.leave(body.lobby_id)
-    this.mainGateway.users.delete(body.player_id)
+    // const user = this.mainGateway.users.get(body.player_id)
+    // user.leave(body.lobby_id)
+    // this.mainGateway.users.delete(body.player_id)
   }
 
   @SubscribeMessage('player:delete')
