@@ -46,7 +46,7 @@ export class LobbyService {
     await lobby.save()
     return lobby
   }
-  async deleteMembers(lobbyId:string,playerId:string) {
+  async deleteMember(lobbyId:string,playerId:string) {
     const lobby=await this.lobbyRepository.findOne({ where: { id: lobbyId },relations: ['players',
         'issues','settings','settings.cards'] }) as Lobby
     const player=await this.playerRepository.findOne({where:{id:playerId}}) as Player
