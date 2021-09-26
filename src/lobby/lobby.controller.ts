@@ -41,6 +41,6 @@ export class LobbyController {
   deleteMember(@Param('lobby_id') lobby_id:string,@Body() player_id:MemberDTO){
     this.logger.log(JSON.stringify(lobby_id))
     this.logger.log(JSON.stringify(player_id))
-    return this.lobbyService.deleteMembers(lobby_id,player_id.player_id)
+    return this.lobbyService.deleteMember(lobby_id,player_id.player_id)
   }
 }

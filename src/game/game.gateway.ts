@@ -6,14 +6,14 @@ import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
 import { GameService } from './game.service';
 import { GameData, GameState } from './interface';
+import { AppGateway } from 'src/app.gateway';
 
 // TO DO: СДЕЛАТЬ ЕВЕНТ СОКЕТ РЕДИРЕКТ ВСЕХ КЛИЕНТОВ ПО ОТПРАВЛЕННОМУ АДРЕСУ И ID
 // FIX: ОТЧИСТКА ИНТЕРВАЛА
 
 @WebSocketGateway()
 export class GameGateway{
-  @WebSocketServer()
-  private server: Server
+
   private logger: Logger = new Logger('GameGateway');
 
   private timer =  {}
@@ -21,7 +21,8 @@ export class GameGateway{
   constructor(private issueService:IssueService,
               private settingsService:SettingsService,
               private gameService:GameService,
-              private lobbyService:LobbyService) {}
+              private lobbyService:LobbyService,
+              private mainGateway: AppGateway) {}
 
   // @SubscribeMessage('game:data')
   // async gameData(
@@ -39,17 +40,17 @@ export class GameGateway{
     const clients=await this.lobbyService.getById(lobbyId)
      if (exit){
          const currClient=await this.lobbyService.currClientDelete(client,playerId)
-         this.server.to(currClient.id).emit('player:deleted')
-       this.server.to(lobbyId).emit('lobby:get', { ...body});
+         this.mainGateway.server.to(currClient.id).emit('player:deleted')
+       this.mainGateway.server.to(lobbyId).emit('lobby:get', { ...body});
      }
      if(exit && isDealer){
        for (const player of clients.players) {
          const currClient = await this.lobbyService.currClientDelete(client, player.id)
-         this.server.to(currClient.id).emit('player:deleted')
+         this.mainGateway.server.to(currClient.id).emit('player:deleted')
        }
      }
      if(!exit &&!isDealer){
-       this.server.to(lobbyId).emit('redirect:get', { pathname,lobbyId});
+       this.mainGateway.server.to(lobbyId).emit('redirect:get', { pathname,lobbyId});
      }
   }
 
@@ -87,6 +88,6 @@ export class GameGateway{
       gameData.status = GameState.paused
     }
     clearInterval(this.timer[lobbyId])
-    this.server.to(lobbyId).emit('game:paused', { gameData })
+    this.mainGateway.server.to(lobbyId).emit('game:paused', { gameData })
   }
 }
