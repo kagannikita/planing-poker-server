@@ -14,6 +14,7 @@ import { Issue } from './issue/issue.entity';
 import { Lobby } from './lobby/lobby.entity';
 import { SettingsModule } from './settings/settings.module';
 import { GameModule } from './game/game.module';
+import { playerSocketConnections } from './shared/playerSocketConnections';
 
 
 
@@ -21,7 +22,7 @@ import { GameModule } from './game/game.module';
   imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, SettingsModule,
     GameModule,TypeOrmModule.forFeature([Issue, Lobby])],
   controllers: [AppController],
-  providers: [IssueService, AppService,AppGateway,{
+  providers: [IssueService, AppService,AppGateway,playerSocketConnections,{
     provide: APP_FILTER,
     useClass:HttpErrorFilter
   },

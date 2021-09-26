@@ -7,11 +7,12 @@ import { SettingsService } from '../settings/settings.service';
 import { GameService } from './game.service';
 import { GameData, GameState } from './interface';
 import { AppGateway } from 'src/app.gateway';
+import { playerSocketConnections } from '../shared/playerSocketConnections';
 
 
 
 @WebSocketGateway()
-export class GameGateway{
+export class GameGateway {
 
   private logger: Logger = new Logger('GameGateway');
 
@@ -20,8 +21,10 @@ export class GameGateway{
   constructor(private issueService:IssueService,
               private settingsService:SettingsService,
               private gameService:GameService,
+              private clientConnect:playerSocketConnections,
               private lobbyService:LobbyService,
-              private mainGateway: AppGateway) {}
+              private mainGateway: AppGateway) {
+}
 
 
   @SubscribeMessage('redirect')
@@ -30,15 +33,15 @@ export class GameGateway{
     const {pathname,lobbyId,exit,isDealer,playerId}=body
     const clients=await this.lobbyService.getById(lobbyId)
     if (exit && !isDealer){
-        const currClient= this.mainGateway.users.get(playerId)
-        this.logger.log( 'curr client ', currClient)
-        console.log('curr client ', this.mainGateway.users)
-        this.mainGateway.server.to(currClient?.id).emit('player:deleted')
+        const currClient= this.clientConnect.getSocket(playerId)
+        console.log('Player id: ',playerId)
+        console.log( 'curr client ', currClient)
+        this.mainGateway.server.to(currClient.id).emit('player:deleted')
        this.mainGateway.server.to(lobbyId).emit('lobby:get', { data: clients});
      }
      if(exit && isDealer){
        for (const player of clients.players) {
-         const currClient = this.mainGateway.users.get(player.id)
+         const currClient = this.clientConnect.getSocket(player.id)
          this.mainGateway.server.to(currClient?.id).emit('player:deleted')
        }
      }
