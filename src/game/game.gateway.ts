@@ -29,18 +29,20 @@ export class GameGateway{
         @MessageBody() body: { pathname: string,playerId:string, lobbyId: string,exit:boolean,isDealer:boolean }) {
     const {pathname,lobbyId,exit,isDealer,playerId}=body
     const clients=await this.lobbyService.getById(lobbyId)
-     if (exit){
-         const currClient=this.mainGateway.users.get(playerId)
-         this.mainGateway.server.to(currClient.id).emit('player:deleted')
-       this.mainGateway.server.to(lobbyId).emit('lobby:get', { ...body});
+    if (exit && !isDealer){
+        const currClient= this.mainGateway.users.get(playerId)
+        this.logger.log( 'curr client ', currClient)
+        console.log('curr client ', this.mainGateway.users)
+        this.mainGateway.server.to(currClient?.id).emit('player:deleted')
+       this.mainGateway.server.to(lobbyId).emit('lobby:get', { data: clients});
      }
      if(exit && isDealer){
        for (const player of clients.players) {
          const currClient = this.mainGateway.users.get(player.id)
-         this.mainGateway.server.to(currClient.id).emit('player:deleted')
+         this.mainGateway.server.to(currClient?.id).emit('player:deleted')
        }
      }
-     if(!exit &&!isDealer){
+     if(!exit && isDealer){
        this.mainGateway.server.to(lobbyId).emit('redirect:get', { pathname,lobbyId});
      }
   }
