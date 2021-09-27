@@ -11,8 +11,9 @@ import { SocketStateService } from 'src/app.socketState';
 
 
 
+
 @WebSocketGateway()
-export class GameGateway{
+export class GameGateway {
 
   private logger: Logger = new Logger('GameGateway');
 
@@ -21,9 +22,11 @@ export class GameGateway{
   constructor(private issueService:IssueService,
               private settingsService:SettingsService,
               private gameService:GameService,
+              private clientConnect:playerSocketConnections,
               private lobbyService:LobbyService,
               private mainGateway: AppGateway,
               private SocketStateService: SocketStateService) {}
+
 
 
   @SubscribeMessage('redirect')

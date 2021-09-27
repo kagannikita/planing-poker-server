@@ -5,6 +5,7 @@ import { LobbyService } from './lobby.service';
 import { AppGateway } from 'src/app.gateway';
 import { SocketStateService } from 'src/app.socketState';
 
+
 @WebSocketGateway()
 export class LobbyGateway  {
 
@@ -30,7 +31,6 @@ export class LobbyGateway  {
     client.emit('lobby:get', { data, playerId });
     this.mainGateway.server.to(lobby_id).emit('lobby:get', { data, playerId});
     console.log('state lenght ', this.socketStateService.length());
-    
   }
 
   @SubscribeMessage('leave')
@@ -56,6 +56,7 @@ export class LobbyGateway  {
     const currClient = this.socketStateService.get(player_id)
     currClient.forEach(soc => this.mainGateway.server.to(soc.id).emit('player:deleted') )
     // this.mainGateway.server.to(currClient.id).emit('player:deleted')
+
     const data = await this.lobbyService.deleteMember(lobby_id, player_id)
     this.mainGateway.server.to(lobby_id).emit('lobby:get', { data });
     this.logger.log(`Player ${player_id} deleted from the lobby ${lobby_id}`)
