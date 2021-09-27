@@ -22,7 +22,6 @@ export class GameGateway {
   constructor(private issueService:IssueService,
               private settingsService:SettingsService,
               private gameService:GameService,
-              private clientConnect:playerSocketConnections,
               private lobbyService:LobbyService,
               private mainGateway: AppGateway,
               private SocketStateService: SocketStateService) {}
