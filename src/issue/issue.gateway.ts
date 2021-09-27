@@ -43,4 +43,13 @@ export class IssueGateway{
     this.mainGateway.server.to(body.lobby_id).emit('lobby:get', { data });
     this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
   }
+
+  @SubscribeMessage('issue:file-added')
+  async getData(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() lobbyId: string
+  ): Promise<void> {
+    const data = await this.lobbyService.getById(lobbyId);
+    client.emit('lobby:get', {data})
+  }
 }

@@ -13,7 +13,7 @@ export class SettingsDTO{
   @IsNotEmpty()
   score_type_short:string
   @IsNotEmpty()
-  timer:string
+  timer:number
   cards:CardDTO[]
 }
 export class CardDTO{

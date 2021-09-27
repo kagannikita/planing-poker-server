@@ -8,5 +8,5 @@ export interface GameData {
   status: GameState,
   currIssueId: string,
   issueScore: number,
-  timer: any
+  timer: number
 }

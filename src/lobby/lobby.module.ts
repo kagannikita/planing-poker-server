@@ -12,11 +12,12 @@ import { PlayerService } from '../player/player.service';
 import { IssueService } from '../issue/issue.service';
 import { SettingsService } from '../settings/settings.service';
 import { AppGateway } from 'src/app.gateway';
+import { SocketStateService } from 'src/app.socketState';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Lobby,Player,Issue,Settings,Cards])],
   controllers: [LobbyController],
-  providers: [LobbyService, PlayerService, IssueService, SettingsService, CloudinaryProvider, LobbyGateway, AppGateway],
+  providers: [LobbyService, PlayerService, IssueService, SettingsService, CloudinaryProvider, LobbyGateway, AppGateway, SocketStateService],
   exports:[CloudinaryProvider,LobbyService,LobbyGateway]
 })
 export class LobbyModule {}
