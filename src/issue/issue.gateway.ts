@@ -5,7 +5,7 @@ import { LobbyService } from '../lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { AppGateway } from 'src/app.gateway';
 
-@WebSocketGateway({namespace: 'issue'})
+@WebSocketGateway()
 export class IssueGateway{
   @WebSocketServer()
   public server: Server;
