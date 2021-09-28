@@ -1,19 +1,22 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { LobbyService } from './lobby.service';
 import { AppGateway } from 'src/app.gateway';
 import { SocketStateService } from 'src/app.socketState';
 
 
-@WebSocketGateway()
+@WebSocketGateway({namespace: 'lobby'})
 export class LobbyGateway  {
+  @WebSocketServer()
+  public server: Server;
 
   private logger: Logger = new Logger('LobbyGateway');
+
   private clientKick:Map<string, string[]>=new Map();
+
   constructor(
     private lobbyService:LobbyService,
-    private mainGateway: AppGateway,
     private socketStateService: SocketStateService
     ) {}
 
@@ -23,13 +26,20 @@ export class LobbyGateway  {
     @MessageBody() body: { playerId: string, lobby_id: string; },
   ): Promise<void> {
     const { playerId, lobby_id } = body
+    if (playerId === '') return
+    console.log('body ', body);
+    
     client.join(lobby_id)
-    // this.mainGateway.users.set(playerId, client);
     this.socketStateService.add(playerId, client)
-    console.log('New user', this.socketStateService.get(playerId))
+    const sock = this.socketStateService.get(playerId)
+    console.log('users arrs ', this.socketStateService.length);
+    
+    console.log('New user', sock.length)
     const data = await this.lobbyService.getById(lobby_id)
-    client.emit('lobby:get', { data, playerId });
-    this.mainGateway.server.to(lobby_id).emit('lobby:get', { data, playerId});
+    
+    this.logger.log('data ', data)
+    sock.forEach(sock => sock.emit('lobby:get', { data, playerId }))
+    this.server.to(lobby_id).emit('lobby:get', { data, playerId});
     console.log('state lenght ', this.socketStateService.length());
   }
 
@@ -42,24 +52,22 @@ export class LobbyGateway  {
     client.disconnect(true)
     client.removeAllListeners()
     this.socketStateService.remove(body.player_id, client)
-    // const user = this.mainGateway.users.get(body.player_id)
-    // this.mainGateway.users.delete(body.player_id)
   }
 
   @SubscribeMessage('player:delete')
   async deletePlayer(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; lobby_id: string },
+    @MessageBody() body: { playerId: string; lobbyId: string },
   ): Promise<void> {
-    const { player_id, lobby_id } = body;
-    // const currClient= this.mainGateway.users.get(player_id);
-    const currClient = this.socketStateService.get(player_id)
-    currClient.forEach(soc => this.mainGateway.server.to(soc.id).emit('player:deleted') )
-    // this.mainGateway.server.to(currClient.id).emit('player:deleted')
+    const { playerId, lobbyId } = body;
+    // const currClient= this.users.get(playerId);
+    const currClient = this.socketStateService.get(playerId)
+    currClient.forEach(soc => this.server.to(soc.id).emit('player:deleted') )
+    // this.server.to(currClient.id).emit('player:deleted')
 
-    const data = await this.lobbyService.deleteMember(lobby_id, player_id)
-    this.mainGateway.server.to(lobby_id).emit('lobby:get', { data });
-    this.logger.log(`Player ${player_id} deleted from the lobby ${lobby_id}`)
+    const data = await this.lobbyService.deleteMember(lobbyId, playerId)
+    this.server.to(lobbyId).emit('lobby:get', { data });
+    this.logger.log(`Player ${playerId} deleted from the lobby ${lobbyId}`)
   }
 
   @SubscribeMessage('vote-kick')
@@ -75,19 +83,21 @@ export class LobbyGateway  {
     const data = await this.lobbyService.getById(lobby_id)
     const votes = ((100 / data.players.filter((player) => player.role === 'player').length)
       * (this.clientKick.get(voteToKickPlayerId).length + 1))
+
     if (votes > 50) {
       const data = await this.lobbyService.deleteMember(lobby_id, voteToKickPlayerId)
       client.to(voteToKickPlayerId).emit('player:deleted')
-      this.mainGateway.server.to(lobby_id).emit('lobby:get', { data });
+      client.leave(lobby_id)
+      this.server.to(lobby_id).emit('lobby:get', { data });
       this.clientKick.delete(voteToKickPlayerId)
+      this.socketStateService.remove(voteToKickPlayerId, client)
       this.logger.log("player with id: ", voteToKickPlayerId, "kicked")
     } else {
       this.clientKick.get(voteToKickPlayerId).push(currentPlayer)
       const kickPlayer = JSON.stringify(Array.from(this.clientKick));
-      this.mainGateway.server.to(lobby_id).emit('kick:voted', { kickPlayer, voteToKickPlayerId, playerName, currentPlayer })
+      this.server.to(lobby_id).emit('kick:voted', { kickPlayer, voteToKickPlayerId, playerName, currentPlayer })
+      
       this.logger.log("Kick voted: ", kickPlayer)
     }
   }
-
-
 }

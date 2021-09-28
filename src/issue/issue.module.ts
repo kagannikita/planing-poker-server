@@ -10,12 +10,11 @@ import { LobbyService } from '../lobby/lobby.service';
 import { Player } from '../player/player.entity';
 import { Cards, Settings } from '../settings/settings.entity';
 import { SettingsService } from '../settings/settings.service';
-import { AppGateway } from 'src/app.gateway';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Issue,Lobby,Player,Settings,Cards])],
   controllers: [IssueController],
-  providers: [IssueService, CloudinaryProvider, IssueGateway, LobbyService, SettingsService, AppGateway],
+  providers: [IssueService, CloudinaryProvider, IssueGateway, LobbyService, SettingsService],
   exports:[CloudinaryProvider,IssueGateway,IssueService]
 })
 export class IssueModule {}

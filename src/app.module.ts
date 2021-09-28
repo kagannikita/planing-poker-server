@@ -21,9 +21,9 @@ import { SocketStateService } from './app.socketState';
 
 @Module({
   imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, SettingsModule,
-    GameModule,TypeOrmModule.forFeature([Issue, Lobby])],
+    GameModule,],
   controllers: [AppController],
-  providers: [IssueService, AppService, AppGateway, SocketStateService, {
+  providers: [ AppService, AppGateway, SocketStateService, {
     provide: APP_FILTER,
     useClass:HttpErrorFilter
   },
