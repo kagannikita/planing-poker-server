@@ -5,13 +5,16 @@ import { LobbyService } from '../lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { AppGateway } from 'src/app.gateway';
 
-@WebSocketGateway()
+@WebSocketGateway({namespace: 'issue'})
 export class IssueGateway{
+  @WebSocketServer()
+  public server: Server;
 
   private logger: Logger = new Logger('IssueGateway');
+
   constructor(private issueService:IssueService,
               private lobbyService:LobbyService,
-              private mainGateway: AppGateway) {}
+              ) {}
 
   @SubscribeMessage('issue:delete')
   async deleteIssue(
@@ -20,7 +23,7 @@ export class IssueGateway{
   ): Promise<void> {
     await this.issueService.destroy(body.id);
     const data = await this.lobbyService.getById(body.lobby_id);
-    this.mainGateway.server.to(body.lobby_id).emit('lobby:get', { data });
+    this.server.to(body.lobby_id).emit('lobby:get', { data });
     this.logger.log(`Issue with ${body.id} deleted from the lobby ${body.lobby_id}`)
   }
 
@@ -30,7 +33,7 @@ export class IssueGateway{
     @MessageBody() body: { name: string, lobby_id: string }
   ): Promise<void> {
     const data = await this.lobbyService.getById(body.lobby_id);
-    this.mainGateway.server.to(body.lobby_id).emit('lobby:get', { data: data });
+    this.server.to(body.lobby_id).emit('lobby:get', { data: data });
     this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
   }
 
@@ -40,7 +43,7 @@ export class IssueGateway{
     @MessageBody() body: { name: string, lobby_id: string }
   ): Promise<void> {
     const data = await this.lobbyService.getById(body.lobby_id);
-    this.mainGateway.server.to(body.lobby_id).emit('lobby:get', { data });
+    this.server.to(body.lobby_id).emit('lobby:get', { data });
     this.logger.log(`Issue ${body.name} created in the lobby ${body.lobby_id}`)
   }
 

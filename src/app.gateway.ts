@@ -10,17 +10,14 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { IssueService } from './issue/issue.service';
-import { LobbyService } from './lobby/lobby.service';
 
 @Injectable()
 @WebSocketGateway()
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   public server: Server;
-  private logger: Logger = new Logger('AppGateway');
-  public users: Map<string, Socket> = new Map();
 
+  private logger: Logger = new Logger('AppGateway');
 
   constructor() { }
   afterInit(): void {
@@ -35,15 +32,15 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.logger.log(`Client disconnected ${client.id}`)
   }
 
-  @SubscribeMessage('send-message')
-  sendMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() body: { message: string },
-  ): void {
-    const { name, room_id } = this.users[client.id] || {};
-    client.broadcast.to(room_id).emit('receive-message', { ...body, name });
-    this.logger.log(body + " " + name)
-  }
+  // @SubscribeMessage('send-message')
+  // sendMessage(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() body: { message: string },
+  // ): void {
+  //   const { name, room_id } = this.users[client.id] || {};
+  //   client.broadcast.to(room_id).emit('receive-message', { ...body, name });
+  //   this.logger.log(body + " " + name)
+  // }
 
 
 }
