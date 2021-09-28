@@ -6,7 +6,7 @@ import { AppGateway } from 'src/app.gateway';
 import { SocketStateService } from 'src/app.socketState';
 
 
-@WebSocketGateway({namespace: 'lobby'})
+@WebSocketGateway()
 export class LobbyGateway  {
   @WebSocketServer()
   public server: Server;
@@ -23,23 +23,18 @@ export class LobbyGateway  {
   @SubscribeMessage('join')
   async joinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { playerId: string, lobby_id: string; },
+    @MessageBody() body: { player_id: string, lobby_id: string; },
   ): Promise<void> {
-    const { playerId, lobby_id } = body
-    if (playerId === '') return
-    console.log('body ', body);
+    const { player_id, lobby_id } = body
+    if(player_id === '') return
     
     client.join(lobby_id)
-    this.socketStateService.add(playerId, client)
-    const sock = this.socketStateService.get(playerId)
-    console.log('users arrs ', this.socketStateService.length);
-    
-    console.log('New user', sock.length)
+    this.socketStateService.add(player_id, client)
+    const sock = this.socketStateService.get(player_id)
+    console.log('New user in that playerId', sock.length)
     const data = await this.lobbyService.getById(lobby_id)
     
-    this.logger.log('data ', data)
-    sock.forEach(sock => sock.emit('lobby:get', { data, playerId }))
-    this.server.to(lobby_id).emit('lobby:get', { data, playerId});
+    this.server.to(lobby_id).emit('lobby:get', { data, player_id});
     console.log('state lenght ', this.socketStateService.length());
   }
 
@@ -60,10 +55,8 @@ export class LobbyGateway  {
     @MessageBody() body: { playerId: string; lobbyId: string },
   ): Promise<void> {
     const { playerId, lobbyId } = body;
-    // const currClient= this.users.get(playerId);
     const currClient = this.socketStateService.get(playerId)
     currClient.forEach(soc => this.server.to(soc.id).emit('player:deleted') )
-    // this.server.to(currClient.id).emit('player:deleted')
 
     const data = await this.lobbyService.deleteMember(lobbyId, playerId)
     this.server.to(lobbyId).emit('lobby:get', { data });

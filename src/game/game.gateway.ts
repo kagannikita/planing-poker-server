@@ -12,7 +12,7 @@ import { SocketStateService } from 'src/app.socketState';
 
 
 
-@WebSocketGateway({namespace: 'game'})
+@WebSocketGateway()
 export class GameGateway {
   @WebSocketServer()
   public server: Server;
@@ -39,10 +39,11 @@ export class GameGateway {
 
       this.SocketStateService.remove(playerId, client)
       const data = await this.lobbyService.deleteMember(lobbyId, playerId)
+      client.emit('player:deleted')
       currClient.forEach(sock => {
         console.log('curr id ', sock.id);
-        sock.leave(lobbyId);
         sock.emit('player:deleted')
+        sock.leave(lobbyId);
       })
       this.server.to(lobbyId).emit('lobby:get', { data });
      }
@@ -74,6 +75,12 @@ export class GameGateway {
     }
 
     this.timer[body.lobbyId] = setInterval(() => {
+      if (countdown <= 0) {
+        body.gameData.status = GameState.paused;
+        body.gameData.timer = countdown
+        clearInterval(this.timer[body.lobbyId]);
+        this.server.to(body.lobbyId).emit('game:paused', { gameData: body.gameData });
+      }
         countdown--
         body.gameData.status = GameState.started;
         body.gameData.timer = countdown
@@ -89,6 +96,7 @@ export class GameGateway {
   ): Promise<void> {
     let { gameData, lobbyId}=body
     gameData.status = GameState.paused
+    this.logger.log('timer ',this.timer[lobbyId], gameData)
     clearInterval(this.timer[lobbyId])
     this.server.to(lobbyId).emit('game:paused', { gameData })
   }
