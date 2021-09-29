@@ -6,10 +6,7 @@ import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
 import { GameService } from './game.service';
 import { GameData, GameState } from './interface';
-import { AppGateway } from 'src/app.gateway';
 import { SocketStateService } from 'src/app.socketState';
-
-
 
 
 @WebSocketGateway()
@@ -18,24 +15,26 @@ export class GameGateway {
   public server: Server;
   private logger: Logger = new Logger('GameGateway');
 
-  private timer =  {}
+  private timer = {}
 
-  constructor(private issueService:IssueService,
-              private settingsService:SettingsService,
-              private gameService:GameService,
-              private lobbyService:LobbyService,
-              private SocketStateService: SocketStateService) {}
+  private issuesState = new Map()
+
+  constructor(private issueService: IssueService,
+    private settingsService: SettingsService,
+    private gameService: GameService,
+    private lobbyService: LobbyService,
+    private SocketStateService: SocketStateService) { }
 
 
 
   @SubscribeMessage('redirect')
   async redirectGame(@ConnectedSocket() client: Socket,
-        @MessageBody() body: { pathname: string,playerId:string, lobbyId: string,exit:boolean,isDealer:boolean }) {
-    const {pathname,lobbyId,exit,isDealer,playerId}=body
+    @MessageBody() body: { pathname: string, playerId: string, lobbyId: string, exit: boolean, isDealer: boolean }) {
+    const { pathname, lobbyId, exit, isDealer, playerId } = body
 
-    if (exit && !isDealer){
-        const currClient = this.SocketStateService.get(playerId)
-        console.log('curr client length ', this.SocketStateService.length())
+    if (exit && !isDealer) {
+      const currClient = this.SocketStateService.get(playerId)
+      console.log('curr client length ', this.SocketStateService.length())
 
       this.SocketStateService.remove(playerId, client)
       const data = await this.lobbyService.deleteMember(lobbyId, playerId)
@@ -46,15 +45,24 @@ export class GameGateway {
         sock.leave(lobbyId);
       })
       this.server.to(lobbyId).emit('lobby:get', { data });
-     }
+    }
 
-     if(exit && isDealer){
-       this.server.to(lobbyId).emit('player:deleted')
-     }
+    if (exit && isDealer) {
+      this.server.to(lobbyId).emit('player:deleted')
+    }
 
-     if(!exit && isDealer){
-       this.server.to(lobbyId).emit('redirect:get', { pathname,lobbyId});
-     }
+    if (!exit && isDealer) {
+      this.server.to(lobbyId).emit('redirect:get', { pathname, lobbyId });
+    }
+  }
+
+  sumScore(): number {
+    let value = 0
+    const iterator = this.issuesState.values()
+    for (const val of iterator) {
+      value +=val 
+    }
+    return value
   }
 
   @SubscribeMessage('game:start')
@@ -63,28 +71,26 @@ export class GameGateway {
     @MessageBody() body: { gameData: GameData, lobbyId: string },
   ): Promise<void> {
     let countdown = body.gameData.timer;
-    // const timer=this.timer
+
     this.logger.log('game:start data ', body.gameData)
-    if (this.timer[body.lobbyId]) clearInterval(this.timer[body.lobbyId]);
-    
-    if (countdown <= 0) {
-      body.gameData.status = GameState.paused;
-      body.gameData.timer = countdown
-      clearInterval(this.timer[body.lobbyId]);
-      this.server.to(body.lobbyId).emit('game:paused', { gameData: body.gameData });
-    }
+
 
     this.timer[body.lobbyId] = setInterval(() => {
-      if (countdown <= 0) {
-        body.gameData.status = GameState.paused;
+      if (countdown < 1) {
+        body.gameData.status = GameState.roundFinished;
         body.gameData.timer = countdown
         clearInterval(this.timer[body.lobbyId]);
-        this.server.to(body.lobbyId).emit('game:paused', { gameData: body.gameData });
-      }
+        body.gameData.issueScore = this.sumScore()
+        body.gameData.playersScore = JSON.stringify(Array.from(this.issuesState));
+        this.server.to(body.lobbyId).emit('game:round-finished', { gameData: body.gameData });
+        this.issuesState.clear()
+      } else {
         countdown--
         body.gameData.status = GameState.started;
         body.gameData.timer = countdown
+        this.logger.log('countdown ', countdown)
         this.server.to(body.lobbyId).emit('game:started', { gameData: body.gameData });
+      }
     }, 1000);
 
   }
@@ -94,10 +100,22 @@ export class GameGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { gameData: GameData, lobbyId: string },
   ): Promise<void> {
-    let { gameData, lobbyId}=body
+    let { gameData, lobbyId } = body
     gameData.status = GameState.paused
-    this.logger.log('timer ',this.timer[lobbyId], gameData)
+    this.logger.log('timer ', this.timer[lobbyId], gameData)
     clearInterval(this.timer[lobbyId])
     this.server.to(lobbyId).emit('game:paused', { gameData })
+  }
+
+  @SubscribeMessage('game:set-score')
+  async setScore(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { score: number, playerId: string, currIssueId: string},
+  ): Promise<void> {
+    let { score, currIssueId, playerId } = body
+    this.issuesState.set(playerId, score)
+
+    this.logger.log(`score ${score} to issue ${currIssueId} setted `)
+    client.emit('game:score-setted')
   }
 }
