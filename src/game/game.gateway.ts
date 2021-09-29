@@ -17,7 +17,7 @@ export class GameGateway {
 
   private timer = {}
 
-  private issuesState = new Map()
+  private issuesState: Map<string, number> = new Map()
 
   constructor(private issueService: IssueService,
     private settingsService: SettingsService,
@@ -76,14 +76,18 @@ export class GameGateway {
 
 
     this.timer[body.lobbyId] = setInterval(() => {
-      if (countdown < 1) {
-        body.gameData.status = GameState.roundFinished;
-        body.gameData.timer = countdown
-        clearInterval(this.timer[body.lobbyId]);
-        body.gameData.issueScore = this.sumScore()
-        body.gameData.playersScore = JSON.stringify(Array.from(this.issuesState));
-        this.server.to(body.lobbyId).emit('game:round-finished', { gameData: body.gameData });
+      if (countdown === 0) {
+        this.issuesState.set('123', 52 + countdown)
+        const data: GameData = {
+          currIssueId: body.gameData.currIssueId,
+          timer: countdown,
+          issueScore: this.sumScore(),
+          playersScore: JSON.stringify(Array.from(this.issuesState)),
+          status: GameState.roundFinished
+        }
+        this.server.to(body.lobbyId).emit('game:round-finished', { gameData: data });
         this.issuesState.clear()
+        clearInterval(this.timer[body.lobbyId]);
       } else {
         countdown--
         body.gameData.status = GameState.started;
