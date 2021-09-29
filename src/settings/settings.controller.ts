@@ -46,7 +46,7 @@ export class SettingsController {
   @Post('cards')
   @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('image'))
-  createCard(@Body() data:CardDTO,@UploadedFile() image:Express.Multer.File)
+  createCard(@Body() data:CardDTO,@UploadedFile() image:string)
   {
     this.logger.log(JSON.stringify(data))
     return this.settingsService.createCards(data,image)

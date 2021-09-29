@@ -40,12 +40,12 @@ export class SettingsService {
     return settings
   }
 
-  async createCards(data:CardDTO,image:Express.Multer.File){
+  async createCards(data:CardDTO,image:string){
     Logger.log(`File: ${image}`)
-    if (image!==undefined){
-      const link=await uploadImage(image)
-      data.image=link.url
-    }
+    // if (image!==undefined){
+    //   const link=await uploadImage(image)
+    //   data.image=link.url
+    // }
     const settings=await this.settingsRepository.findOne({where:{id:data.settings}}) as Settings
     if(!settings){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
