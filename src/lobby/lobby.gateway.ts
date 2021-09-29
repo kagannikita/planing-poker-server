@@ -2,7 +2,6 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSo
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { LobbyService } from './lobby.service';
-import { AppGateway } from 'src/app.gateway';
 import { SocketStateService } from 'src/app.socketState';
 
 
