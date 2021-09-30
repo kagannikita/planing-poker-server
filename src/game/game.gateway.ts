@@ -17,15 +17,13 @@ export class GameGateway {
 
   private timer = {}
 
-  private issuesState: Map<string, number> = new Map()
+  private issuesState: Map<string, string> = new Map()
 
   constructor(private issueService: IssueService,
     private settingsService: SettingsService,
     private gameService: GameService,
     private lobbyService: LobbyService,
     private SocketStateService: SocketStateService) { }
-
-
 
   @SubscribeMessage('redirect')
   async redirectGame(@ConnectedSocket() client: Socket,
@@ -56,13 +54,22 @@ export class GameGateway {
     }
   }
 
-  sumScore(): number {
+  count(arr: string[]) {
+  const obj = arr.reduce((acc, cur) => {
+    acc[cur] = (acc[cur] || 0) + 1;
+    return acc
+  }, {})
+  return obj
+}
+  sumScore(): {} {
     let value = 0
-    const iterator = this.issuesState.values()
-    for (const val of iterator) {
-      value +=val 
-    }
-    return value
+    const arr = Array.from(this.issuesState.values())
+    const obj = this.count(arr);
+
+    this.logger.log(obj)
+
+
+    return obj
   }
 
   @SubscribeMessage('game:start')
@@ -77,7 +84,6 @@ export class GameGateway {
 
     this.timer[body.lobbyId] = setInterval(() => {
       if (countdown === 0) {
-        this.issuesState.set('123', 52 + countdown)
         const data: GameData = {
           currIssueId: body.gameData.currIssueId,
           timer: countdown,
@@ -114,12 +120,12 @@ export class GameGateway {
   @SubscribeMessage('game:set-score')
   async setScore(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { score: number, playerId: string, currIssueId: string},
+    @MessageBody() body: { score: string, playerId: string, lobbyId:string },
   ): Promise<void> {
-    let { score, currIssueId, playerId } = body
+    const { score, playerId, lobbyId } = body
     this.issuesState.set(playerId, score)
-
-    this.logger.log(`score ${score} to issue ${currIssueId} setted `)
-    client.emit('game:score-setted')
+    
+    this.logger.log(`score ${score} to current issue setted `)
+    this.server.to(lobbyId).emit('game:score-setted', { cardName: this.issuesState.get(playerId)})
   }
 }

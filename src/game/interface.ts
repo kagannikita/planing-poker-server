@@ -10,6 +10,6 @@ export interface GameData {
   status: GameState,
   playersScore: string,
   currIssueId: string,
-  issueScore: number,
+  issueScore: {},
   timer: number
 }
