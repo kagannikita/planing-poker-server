@@ -98,6 +98,7 @@ export class GameGateway {
         countdown--
         body.gameData.status = GameState.started;
         body.gameData.timer = countdown
+        body.gameData.playersScore = JSON.stringify(Array.from(this.issuesState))
         this.logger.log('countdown ', countdown)
         this.server.to(body.lobbyId).emit('game:started', { gameData: body.gameData });
       }
@@ -126,6 +127,6 @@ export class GameGateway {
     this.issuesState.set(playerId, score)
     
     this.logger.log(`score ${score} to current issue setted `)
-    this.server.to(lobbyId).emit('game:score-setted', { cardName: this.issuesState.get(playerId)})
+    this.server.to(lobbyId).emit('game:score-setted', Array.from(this.issuesState.values()))
   }
 }
