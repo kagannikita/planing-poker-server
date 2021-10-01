@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { IssueService } from './issue.service';
 import { LobbyService } from '../lobby/lobby.service';
 import { Logger } from '@nestjs/common';
-import { AppGateway } from 'src/app.gateway';
+
 
 @WebSocketGateway()
 export class IssueGateway{

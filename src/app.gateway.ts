@@ -29,15 +29,4 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.logger.log(`Client disconnected ${client.id}`)
   }
 
-  // @SubscribeMessage('send-message')
-  // sendMessage(
-  //   @ConnectedSocket() client: Socket,
-  //   @MessageBody() body: { message: string },
-  // ): void {
-  //   const { name, room_id } = this.users[client.id] || {};
-  //   client.broadcast.to(room_id).emit('receive-message', { ...body, name });
-  //   this.logger.log(body + " " + name)
-  // }
-
-
 }

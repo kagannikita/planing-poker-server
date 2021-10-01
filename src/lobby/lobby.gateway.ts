@@ -2,7 +2,7 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSo
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { LobbyService } from './lobby.service';
-import { SocketStateService } from 'src/app.socketState';
+import { SocketStateService } from 'src/shared/socketState';
 
 
 @WebSocketGateway()
@@ -26,13 +26,13 @@ export class LobbyGateway  {
   ): Promise<void> {
     const { player_id, lobby_id } = body
     if(player_id === '') return
-    
+
     client.join(lobby_id)
     this.socketStateService.add(player_id, client)
     const sock = this.socketStateService.get(player_id)
     console.log('New user in that playerId', sock.length)
     const data = await this.lobbyService.getById(lobby_id)
-    
+
     this.server.to(lobby_id).emit('lobby:get', { data, player_id});
     console.log('state lenght ', this.socketStateService.length());
   }
@@ -88,7 +88,7 @@ export class LobbyGateway  {
       this.clientKick.get(voteToKickPlayerId).push(currentPlayer)
       const kickPlayer = JSON.stringify(Array.from(this.clientKick));
       this.server.to(lobby_id).emit('kick:voted', { kickPlayer, voteToKickPlayerId, playerName, currentPlayer })
-      
+
       this.logger.log("Kick voted: ", kickPlayer)
     }
   }

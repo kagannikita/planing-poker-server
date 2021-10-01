@@ -5,8 +5,8 @@ import { IssueService } from '../issue/issue.service';
 import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
 import { GameService } from './game.service';
-import { GameData, GameState } from './interface';
-import { SocketStateService } from 'src/app.socketState';
+import { GameData, GameState } from './game.interface';
+import { SocketStateService } from 'src/shared/socketState';
 
 
 @WebSocketGateway()
@@ -125,7 +125,7 @@ export class GameGateway {
   ): Promise<void> {
     const { score, playerId, lobbyId } = body
     this.issuesState.set(playerId, score)
-    
+
     this.logger.log(`score ${score} to current issue setted `)
     this.server.to(lobbyId).emit('game:score-setted', Array.from(this.issuesState.values()))
   }

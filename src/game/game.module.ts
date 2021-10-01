@@ -10,14 +10,14 @@ import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
 import { GameGateway } from './game.gateway';
 import { GameService } from './game.service';
-import { SocketStateService } from 'src/app.socketState';
+import { SocketStateService } from 'src/shared/socketState';
 
 
 @Module({
   imports:[TypeOrmModule.forFeature([Issue,Lobby,Player,Settings,Cards])],
   // controllers: [IssueController],
 
-  providers: [CloudinaryProvider, GameGateway, GameService, 
+  providers: [CloudinaryProvider, GameGateway, GameService,
               LobbyService, SettingsService, IssueService, SocketStateService],
   exports:[CloudinaryProvider,GameGateway]
 })

@@ -9,19 +9,14 @@ import { LoggingInterceptor } from './shared/logging.interceptor';
 import { LobbyModule } from './lobby/lobby.module';
 import { AppGateway } from './app.gateway';
 import { IssueModule } from './issue/issue.module';
-import { IssueService } from './issue/issue.service';
-import { Issue } from './issue/issue.entity';
-import { Lobby } from './lobby/lobby.entity';
 import { SettingsModule } from './settings/settings.module';
 import { GameModule } from './game/game.module';
-import { SocketStateService } from './app.socketState';
-
-
-
+import { SocketStateService } from './shared/socketState';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot(), PlayerModule, LobbyModule, IssueModule, SettingsModule,
-    GameModule,],
+    GameModule,ChatModule],
   controllers: [AppController],
   providers: [ AppService, AppGateway, SocketStateService, {
     provide: APP_FILTER,

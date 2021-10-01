@@ -16,7 +16,6 @@ export class Settings extends BaseEntity {
   @Column('bool',{ nullable: true }) timer_needed:boolean
   @Column('text',{ nullable: true }) score_type:string
   @Column('text',{ nullable: true }) score_type_short:string
-  // @Column('timestamptz',{nullable: true }) timer: string;
   @Column({nullable: true }) timer: number;
   @OneToMany(type => Cards, card => card.settings)
   cards: Cards[];

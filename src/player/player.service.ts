@@ -14,6 +14,9 @@ export class PlayerService {
   async showAll(){
     return await this.playerRepository.find()
   }
+  async getPlayer(playerId:string){
+    return await this.playerRepository.findOne({where: { id: playerId }})
+  }
 
   async create(data:PlayerDTO,image:Express.Multer.File){
     Logger.log(`File: ${image}`)

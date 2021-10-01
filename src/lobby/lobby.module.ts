@@ -11,7 +11,7 @@ import { Cards, Settings } from '../settings/settings.entity';
 import { PlayerService } from '../player/player.service';
 import { IssueService } from '../issue/issue.service';
 import { SettingsService } from '../settings/settings.service';
-import { SocketStateService } from 'src/app.socketState';
+import { SocketStateService } from 'src/shared/socketState';
 import { AppGateway } from 'src/app.gateway';
 
 
