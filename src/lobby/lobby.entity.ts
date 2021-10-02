@@ -4,12 +4,13 @@ import {
   CreateDateColumn,
   Entity, JoinColumn,
   JoinTable,
-  ManyToMany, OneToMany, OneToOne,
+  ManyToMany, ManyToOne, OneToMany, OneToOne,
   PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
 import { Player } from '../player/player.entity';
 import { Issue } from '../issue/issue.entity';
 import { Settings } from '../settings/settings.entity';
+import { Chat } from '../chat/chat.entity';
 
 
 @Entity('lobby')

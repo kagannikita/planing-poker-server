@@ -4,9 +4,9 @@ import { LobbyDTO } from '../lobby/lobby.dto';
 
 export class ChatDTO{
   @IsNotEmpty()
-  member:PlayerDTO
+  members:PlayerDTO[]
   @IsNotEmpty()
   message:string
   @IsNotEmpty()
-  room:LobbyDTO
+  rooms:LobbyDTO[]
 }
