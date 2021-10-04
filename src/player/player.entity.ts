@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Lobby } from '../lobby/lobby.entity';
 import { Chat } from '../chat/chat.entity';
 
 @Entity('player')

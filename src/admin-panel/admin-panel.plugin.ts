@@ -6,16 +6,14 @@ import { Player } from '../player/player.entity';
 import { Lobby } from '../lobby/lobby.entity';
 import { Issue } from '../issue/issue.entity';
 import { Cards, Settings } from '../settings/settings.entity';
+import { Chat } from '../chat/chat.entity';
 
 export async function setupAdminPanel(app: INestApplication): Promise<void> {
 
-  /**
-   * Register TypeORM adapter for using
-   */
   AdminBro.registerAdapter({ Database, Resource });
 
   const adminBro = new AdminBro({
-    resources: [Player,Lobby,Issue,Settings,Cards],
+    resources: [Player,Lobby,Issue,Settings,Cards,Chat],
     rootPath: '/admin',
   });
 

@@ -28,9 +28,13 @@ export class ChatGateway {
     @MessageBody() body: { player_id: string; lobby_id: string,message:string },
   ): Promise<void> {
       const {player_id,lobby_id,message}=body
+      const members=[]
+      const rooms=[]
       const player=await this.playerService.getPlayer(player_id)
       const room=await this.lobbyService.getById(lobby_id)
-      await this.chatService.createMessage({member:player,room:room,message:message})
+      members.push(player)
+      rooms.push(room)
+      await this.chatService.createMessage({members:members,rooms:rooms,message:message})
       this.server.to(lobby_id).emit('message:get', { player,message});
     }
 
