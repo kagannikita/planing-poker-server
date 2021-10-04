@@ -18,14 +18,14 @@ export class Chat extends BaseEntity{
   @JoinTable({
     name: 'members',
     joinColumn: { name: 'chat_id', referencedColumnName: 'id'},
-    inverseJoinColumn: { name: 'player_id', referencedColumnName: 'id'},
+    inverseJoinColumn: { name: 'member_id', referencedColumnName: 'id'},
   })
   members:Player[]
   @ManyToMany(type => Lobby, { cascade: true,nullable:true })
   @JoinTable({
     name: 'rooms',
     joinColumn: { name: 'chat_id', referencedColumnName: 'id'},
-    inverseJoinColumn: { name: 'lobby_id', referencedColumnName: 'id'},
+    inverseJoinColumn: { name: 'room_id', referencedColumnName: 'id'},
   })
   rooms:Lobby[]
   @Column('text') message:string

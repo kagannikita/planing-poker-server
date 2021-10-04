@@ -34,8 +34,8 @@ export class ChatGateway {
       const room=await this.lobbyService.getById(lobbyId)
       members.push(player)
       rooms.push(room)
-      // await this.chatService.createMessage({members:members,rooms:rooms,message:message})
-      this.server.to(lobbyId).emit('message:get', { members:[player],message:message});
+      await this.chatService.createMessage({members:members,rooms:rooms,message:message})
+      this.server.to(lobbyId).emit('message:get', { members:members,message:message});
     }
 
   @SubscribeMessage('chat:changeMsg')
