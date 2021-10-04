@@ -1,6 +1,6 @@
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { HttpStatus, Logger } from '@nestjs/common';
 import { IssueService } from '../issue/issue.service';
 import { LobbyService } from '../lobby/lobby.service';
 import { SettingsService } from '../settings/settings.service';
@@ -17,13 +17,20 @@ export class GameGateway {
 
   private timer = {}
 
+  private gameData:GameData ={ 
+    currIssueId: '',
+    issueScore: new Map(),
+    playersScore:'',
+    status: GameState.init,
+    timer: 0
+  }
   private issuesState: Map<string, string> = new Map()
 
   constructor(private issueService: IssueService,
     private settingsService: SettingsService,
     private gameService: GameService,
     private lobbyService: LobbyService,
-    private SocketStateService: SocketStateService) { }
+    private SocketStateService: SocketStateService) {}
 
   @SubscribeMessage('redirect')
   async redirectGame(@ConnectedSocket() client: Socket,
@@ -54,23 +61,6 @@ export class GameGateway {
     }
   }
 
-  count(arr: string[]) {
-  const obj = arr.reduce((acc, cur) => {
-    acc[cur] = (acc[cur] || 0) + 1;
-    return acc
-  }, {})
-  return obj
-}
-  sumScore(): {} {
-    let value = 0
-    const arr = Array.from(this.issuesState.values())
-    const obj = this.count(arr);
-
-    this.logger.log(obj)
-
-
-    return obj
-  }
 
   @SubscribeMessage('game:start')
   async gameStart(
@@ -81,17 +71,18 @@ export class GameGateway {
 
     this.logger.log('game:start data ', body.gameData)
 
-
     this.timer[body.lobbyId] = setInterval(() => {
       if (countdown === 0) {
-        const data: GameData = {
+        this.gameData = {
           currIssueId: body.gameData.currIssueId,
           timer: countdown,
-          issueScore: this.sumScore(),
+          issueScore: this.gameService.sumScore(this.issuesState.values()),
           playersScore: JSON.stringify(Array.from(this.issuesState)),
           status: GameState.roundFinished
         }
-        this.server.to(body.lobbyId).emit('game:round-finished', { gameData: data });
+        this.server.to(body.lobbyId).emit('game:get-status', this.gameData.status)
+        this.server.to(body.lobbyId).emit('game:response-round-results', this.gameData.issueScore)
+        this.server.to(body.lobbyId).emit('game:started', { gameData: this.gameData });
         this.issuesState.clear()
         clearInterval(this.timer[body.lobbyId]);
       } else {
@@ -111,10 +102,11 @@ export class GameGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { gameData: GameData, lobbyId: string },
   ): Promise<void> {
-    let { gameData, lobbyId } = body
-    gameData.status = GameState.paused
-    this.logger.log('timer ', this.timer[lobbyId], gameData)
+    const { gameData, lobbyId } = body
+    this.gameData.status = GameState.paused
+    this.logger.log('timer ', this.timer[lobbyId])
     clearInterval(this.timer[lobbyId])
+    this.server.to(lobbyId).emit('game:get-status', this.gameData.status )
     this.server.to(lobbyId).emit('game:paused', { gameData })
   }
 
@@ -125,8 +117,22 @@ export class GameGateway {
   ): Promise<void> {
     const { score, playerId, lobbyId } = body
     this.issuesState.set(playerId, score)
-
     this.logger.log(`score ${score} to current issue setted `)
-    this.server.to(lobbyId).emit('game:score-setted', Array.from(this.issuesState.values()))
+    this.server.to(lobbyId).emit('game:response-round-results', this.gameData.issueScore)
+  }
+
+  @SubscribeMessage('game:join')
+  async getRoundResults(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    client.emit('game:joined', { gameData: this.gameData } )
+  }
+
+  @SubscribeMessage('game:get-game-results')
+  async getGameResults(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { lobbyId: string },
+  ): Promise<void> {
+    this.server.to(body.lobbyId).emit('game:response-game-results')
   }
 }
