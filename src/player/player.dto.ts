@@ -8,4 +8,5 @@ export class PlayerDTO{
   image?:string
   @IsNotEmpty()
   role:string
+  id?: string
 }

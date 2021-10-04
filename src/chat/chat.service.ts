@@ -36,12 +36,12 @@ export class ChatService {
     return chat
   }
   async createMessage(data:ChatDTO){
-    const room=await this.lobbyRepository.findOne({where:{id:data.rooms[0]}}) as Lobby
+    const room=await this.lobbyRepository.findOne({where:{id:data.rooms[0].id}}) as Lobby
     if(!room){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }
     data.rooms.push(room)
-    const member=await this.playerRepository.findOne({where:{id:data.members[0]}}) as Player
+    const member=await this.playerRepository.findOne({where:{id:data.members[0].id}}) as Player
     if(!member){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
     }

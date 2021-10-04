@@ -25,17 +25,17 @@ export class ChatGateway {
   @SubscribeMessage('chat:sendMsg')
   async sendMsg(
       @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; lobby_id: string,message:string },
+    @MessageBody() body: { yourMember: string; lobbyId: string,message:string },
   ): Promise<void> {
-      const {player_id,lobby_id,message}=body
+      const {yourMember,lobbyId,message}=body
       const members=[]
       const rooms=[]
-      const player=await this.playerService.getPlayer(player_id)
-      const room=await this.lobbyService.getById(lobby_id)
+      const player=await this.playerService.getPlayer(yourMember)
+      const room=await this.lobbyService.getById(lobbyId)
       members.push(player)
       rooms.push(room)
-      await this.chatService.createMessage({members:members,rooms:rooms,message:message})
-      this.server.to(lobby_id).emit('message:get', { player,message});
+      // await this.chatService.createMessage({members:members,rooms:rooms,message:message})
+      this.server.to(lobbyId).emit('message:get', { members:[player],message:message});
     }
 
   @SubscribeMessage('chat:changeMsg')

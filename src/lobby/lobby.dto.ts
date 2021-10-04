@@ -7,6 +7,7 @@ export class LobbyDTO {
   name:string
   players?:PlayerDTO[]
   settings:Settings
+  id?: string
 }
 export class MemberDTO{
   @IsNotEmpty()
