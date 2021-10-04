@@ -80,8 +80,6 @@ export class GameGateway {
           playersScore: JSON.stringify(Array.from(this.issuesState)),
           status: GameState.roundFinished
         }
-        this.server.to(body.lobbyId).emit('game:get-status', this.gameData.status)
-        this.server.to(body.lobbyId).emit('game:response-round-results', this.gameData.issueScore)
         this.server.to(body.lobbyId).emit('game:started', { gameData: this.gameData });
         this.issuesState.clear()
         clearInterval(this.timer[body.lobbyId]);
@@ -106,7 +104,6 @@ export class GameGateway {
     this.gameData.status = GameState.paused
     this.logger.log('timer ', this.timer[lobbyId])
     clearInterval(this.timer[lobbyId])
-    this.server.to(lobbyId).emit('game:get-status', this.gameData.status )
     this.server.to(lobbyId).emit('game:paused', { gameData })
   }
 
