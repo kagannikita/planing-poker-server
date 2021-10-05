@@ -24,6 +24,8 @@ export class GameGateway {
     status: GameState.init,
     timer: 0
   }
+
+  private gameStates: Map<string, GameData> = new Map()
   private issuesState: Map<string, string> = new Map()
 
   constructor(private issueService: IssueService,
@@ -115,7 +117,7 @@ export class GameGateway {
     const { score, playerId, lobbyId } = body
     this.issuesState.set(playerId, score)
     this.logger.log(`score ${score} to current issue setted `)
-    this.server.to(lobbyId).emit('game:response-round-results', this.gameData.issueScore)
+    this.server.to(lobbyId).emit('game:response-round-results', this.gameService.sumScore(this.issuesState.values()))
   }
 
   @SubscribeMessage('game:join')
