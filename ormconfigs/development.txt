@@ -1,12 +1,19 @@
 {
   "type": "postgres",
-  "host": "127.0.0.1",
+  "host": "ec2-44-198-80-194.compute-1.amazonaws.com",
   "port": "5432",
-  "username": "postgres",
-  "password": "123456",
-  "database": "plaining-poker",
+  "username": "mdjhacdrpttgax",
+  "password": "ae47359f23c235cc20464967bb3033d8eb2a9e0e75f3a6358c854de5962e1fe6",
+  "database": "db9vup2eiaae33",
   "synchronize": true,
   "logging": true,
+  "dropSchema": false,
+  "ssl": true,
+  "extra": {
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  },
   "entities": [
     "src/**/*.entity.ts", "dist/**/*.entity.js"
   ]
