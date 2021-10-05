@@ -18,7 +18,6 @@ export class ChatGateway {
     private playerService: PlayerService,
     private chatService:ChatService,
     private lobbyService:LobbyService,
-    private socketStateService: SocketStateService
   ) {
   }
 

@@ -29,6 +29,7 @@ export class ChatService {
         { roomsId: lobbyId }
       )
       .innerJoinAndSelect('chat.members', 'members')
+      .orderBy('chat.created', 'ASC')
       .getMany();
     if(!chat){
       throw new HttpException('Not found',HttpStatus.NOT_FOUND)
