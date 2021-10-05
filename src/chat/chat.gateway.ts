@@ -35,27 +35,32 @@ export class ChatGateway {
       members.push(player)
       rooms.push(room)
       await this.chatService.createMessage({members:members,rooms:rooms,message:message})
-      this.server.to(lobbyId).emit('message:get', { members:members,message:message});
+      const data=await this.chatService.getMessagesByLobby(lobbyId)
+      this.server.to(lobbyId).emit('message:get', data);
     }
 
   @SubscribeMessage('chat:changeMsg')
   async changeMsg(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { player_id: string; lobby_id: string,message:string,chat_id:string },
+    @MessageBody() body: { playerId: string; lobbyId: string,message:string,chatId:string },
   ): Promise<void> {
-    const {player_id,lobby_id,chat_id,message}=body
-    const data=await this.playerService.getPlayer(player_id)
-    await this.chatService.putMessage(chat_id,{message})
-    this.server.to(lobby_id).emit('message:get', { data,message, lobby_id});
+    const {playerId,lobbyId,chatId,message}=body
+    const members=[]
+    const player=await this.playerService.getPlayer(playerId)
+    await this.chatService.putMessage(chatId,{message})
+    members.push(player)
+    const data=await this.chatService.getMessagesByLobby(lobbyId)
+    this.server.to(lobbyId).emit('message:get', data);
   }
 
   @SubscribeMessage('chat:deleteMsg')
   async deleteMsg(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { lobby_id: string,chat_id:string },
+    @MessageBody() body: { lobbyId: string,chatId:string },
   ): Promise<void> {
-    const {lobby_id,chat_id}=body
-    await this.chatService.deleteMessage(chat_id)
-    this.server.to(lobby_id).emit('message:remove', {msg:'Message removed'});
+    const {lobbyId,chatId}=body
+    await this.chatService.deleteMessage(chatId)
+    const data=await this.chatService.getMessagesByLobby(lobbyId)
+    this.server.to(lobbyId).emit('message:get', data);
   }
 }

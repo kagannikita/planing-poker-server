@@ -35,6 +35,7 @@ export class ChatService {
     }
     return chat
   }
+
   async createMessage(data:ChatDTO){
     return await this.chatRepository.save(data)
   }
