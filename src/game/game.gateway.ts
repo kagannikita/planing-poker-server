@@ -1,9 +1,7 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { HttpStatus, Logger } from '@nestjs/common';
-import { IssueService } from '../issue/issue.service';
+import { Logger } from '@nestjs/common';
 import { LobbyService } from '../lobby/lobby.service';
-import { SettingsService } from '../settings/settings.service';
 import { GameService } from './game.service';
 import { GameData, GameState } from './game.interface';
 import { SocketStateService } from 'src/shared/socketState';
@@ -28,8 +26,7 @@ export class GameGateway {
   private gameStates: Map<string, GameData> = new Map()
   private issuesState: Map<string, string> = new Map()
 
-  constructor(private issueService: IssueService,
-    private settingsService: SettingsService,
+  constructor(
     private gameService: GameService,
     private lobbyService: LobbyService,
     private SocketStateService: SocketStateService) {}
